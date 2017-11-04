@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Presentation Recording</string>
+
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+
+    <string name="title_activity_fullscreen2">FullscreenActivity2</string>
+
+    <string name="title_activity_record">Record</string>
+</resources>

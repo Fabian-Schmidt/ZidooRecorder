@@ -1,0 +1,704 @@
+package net.schmidtie.presentationrecording;
+
+
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Handler;
+import android.os.Message;
+import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.TextView;
+
+import com.realtek.server.HDMIRxStatus;
+
+import net.schmidtie.presentationrecording.info.RecordInfo;
+import net.schmidtie.presentationrecording.info.ResolutionInfo;
+import net.schmidtie.util.FileUtil;
+
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+
+public abstract class RecorderAbstraction {
+    public static final long CACHE_SPACE = 104857600;
+    private static final int CONTINUERECORDER = 3;
+    private static final int COUNT = 0;
+    private static final int COUNTTIME = 1000;
+    //private static final int HANDLE_IDENTIFING = 71;
+    private static final int HANDLE_IDENTIF_FAIL = 73;
+    private static final int HANDLE_IDENTIF_SUCCESS = 72;
+    public static final long MAX_EXFAT_SIZE = 3922932531L;
+    public static final long MAX_SIZE = 2008541455872L;
+    private static final int PREPARE = 74;
+    private static final int PREPARETIME = 200;
+    public static final int RECORDING_BACKGROUND = 2;
+    public static final int RECORDING_CRAME = 1;
+    public static final int RECORDING_SOURCE_IN = 0;
+    private static final String TAG = "RecorderAbstraction";
+    private boolean isActivityDisPlay = false;
+    private boolean isHdmiConnect = false;
+    private boolean isPiping = false;
+    private boolean isRecording = false;
+    private boolean isReservation = false;
+    private boolean isUdping = false;
+    private Context mContext = null;
+    private int mCount = 0;
+    //private TextView mCountView = null;
+    private RecordInfo mCurrentRecordInfo = null;
+    private Handler mHandler = null;
+    private BroadcastReceiver mHdmiRxHotPlugReceiver = null;
+    //private LoadingDialog mLoadPathDialog = null;
+    private WindowManager mManager = null;
+    private int mPrepareCount = 0;
+    //public RecoderListener mRecoderListener = null;
+    private RecordInfo mRecordInfo = null;
+    private RecordInfo mReservationsInfo = null;
+    private ArrayList<ResolutionInfo> mResolutionInfoList = new ArrayList();
+    //private TextView mTotalView = null;
+    private int mType = 0;
+    //private View mView = null;
+
+    public RecorderAbstraction(Context context, int i) {
+        this.mContext = context;
+        this.mType = i;
+        init();
+        initHandler();
+        initHdmiConnect();
+    }
+
+    private void dismiss() {
+        if (this.mManager != null) {
+            this.mManager.removeView(this.mView);
+            this.mManager = null;
+        }
+    }
+
+    private void init() {
+        try {
+            this.mRecordInfo = new RecordInfo();
+            initRecordinfo();
+
+            this.mRecordInfo.mType = 0;
+
+            String recordFolder = FileUtil.GetStorageFolder();
+            recordFolder = "/storage/emulated/0";
+            String recordFileName = "VID_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + "_";
+            String str = recordFolder + File.separator + "hdmi" + File.separator + recordFileName + (this.mRecordInfo.mType == 0 ? ".ts" : ".mp4");
+            Log.d(TAG, "record path = " + str);
+            File file = new File(str);
+            file.createNewFile();
+            FileUtil.ChangeFileToFullAcess(str);
+
+            this.mRecordInfo.mIdentifier = file;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void initHandler() {
+        this.mHandler = new Handler() {
+
+            @Override
+            public void handleMessage(Message message) {
+                boolean booleanValue;
+                switch (message.what) {
+                    case COUNT:
+                        RecorderAbstraction RecorderAbstraction = RecorderAbstraction.this;
+                        RecorderAbstraction.mCount = RecorderAbstraction.mCount + 1;
+                        if (RecorderAbstraction.this.mCurrentRecordInfo != null) {
+                            if (RecorderAbstraction.this.mCurrentRecordInfo.mVideoLength == 0) {
+                                //RecorderAbstraction.this.mTotalView.setVisibility(8);
+                            } else if (((long) RecorderAbstraction.this.mCount) >= RecorderAbstraction.this.mCurrentRecordInfo.mVideoLength) {
+                                //MyToast.toast(RecorderAbstraction.this.mContext, RecorderAbstraction.this.mContext.getString(C0248R.string.recording_video_duration));
+                                RecorderAbstraction.this.stopRecord();
+                                return;
+                            } else {
+                                //RecorderAbstraction.this.mTotalView.setVisibility(8);
+                                //RecorderAbstraction.this.mCountView.setText("/" + RecorderAbstraction.this.mCurrentRecordInfo.getVideoLength(RecorderAbstraction.this.mCurrentRecordInfo.mVideoLength));
+                            }
+                            //RecorderAbstraction.this.mCountView.setText(RecorderAbstraction.this.mCurrentRecordInfo.getVideoLength((long) RecorderAbstraction.this.mCount));
+                            if (RecorderAbstraction.this.isRecording) {
+                                try {
+                                    long length = new File(RecorderAbstraction.this.mCurrentRecordInfo.mCurrentRecordFilePath).length();
+                                    if (!RecorderAbstraction.this.mCurrentRecordInfo.isExfat || length < RecorderAbstraction.MAX_EXFAT_SIZE) {
+                                        length = 2000000000;//ZidooFileSizeFile.getAvailableSize(RecorderAbstraction.this.mCurrentRecordInfo.mCurrentRecordFilePath);
+                                        if (length <= RecorderAbstraction.CACHE_SPACE) {
+                                            Log.d(TAG, "CACHE_SPACE = " + RecorderAbstraction.CACHE_SPACE + "  ava = " + length);
+                                            Log.d(TAG, "CACHE_SPACE = 104857600  ava = " + length);
+                                            //MyToast.toast(RecorderAbstraction.this.mContext, RecorderAbstraction.this.mContext.getString(C0248R.string.space_error), 1);
+                                            RecorderAbstraction.this.stopRecord();
+                                            return;
+                                        }
+                                        RecorderAbstraction.this.mHandler.sendEmptyMessageDelayed(COUNT, COUNTTIME);
+                                    } else {
+                                        Log.d(TAG, "avlength >= MAX_EXFAT_SIZE ----- avlength " + length + "  mCurrentRecordInfo.isExfat = " + RecorderAbstraction.this.mCurrentRecordInfo.isExfat);
+                                        RecorderAbstraction.this.continueRecorder();
+                                        RecorderAbstraction.this.mHandler.removeMessages(CONTINUERECORDER);
+                                        RecorderAbstraction.this.mHandler.sendEmptyMessageDelayed(CONTINUERECORDER, 3000);
+                                        return;
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                            return;
+                        }
+                        return;
+                    case CONTINUERECORDER:
+                        if (RecorderAbstraction.this.startRecorder(true)) {
+                            RecorderAbstraction.this.mHandler.removeMessages(COUNT);
+                            RecorderAbstraction.this.mHandler.sendEmptyMessage(COUNT);
+                            return;
+                        }
+                        RecorderAbstraction.this.stopRecord();
+                        return;
+                    case HANDLE_IDENTIF_SUCCESS:
+                        //removeMessages(HANDLE_IDENTIFING);
+                        //if (RecorderAbstraction.this.mLoadPathDialog != null) {
+                            //RecorderAbstraction.this.mLoadPathDialog.dismiss();
+                        //}
+                        booleanValue = ((Boolean) message.obj).booleanValue();
+                        RecorderAbstraction.this.mPrepareCount = 0;
+                        RecorderAbstraction.this.mHandler.removeMessages(PREPARE);
+                        if (RecorderAbstraction.this.isRecordBackground() && !RecorderAbstraction.this.isPrepare()) {
+                            RecorderAbstraction.this.mHandler.sendMessageDelayed(RecorderAbstraction.this.mHandler.obtainMessage(PREPARE, Boolean.valueOf(booleanValue)), PREPARETIME);
+                            return;
+                        } else if (booleanValue) {
+                            RecorderAbstraction.this.prepareRecorder();
+                            return;
+                        } else {
+                            RecorderAbstraction.this.prepareUdp();
+                            return;
+                        }
+                    case HANDLE_IDENTIF_FAIL:
+                        //removeMessages(HANDLE_IDENTIFING);
+                        //if (RecorderAbstraction.this.mLoadPathDialog != null) {
+                            //RecorderAbstraction.this.mLoadPathDialog.dismiss();
+                        //}
+                        if (message.arg2 == 0) {
+                            //MyToast.toast(RecorderAbstraction.this.mContext, RecorderAbstraction.this.mContext.getString(C0248R.string.hdmi_file_path_not));
+                        } else {
+                            //MyToast.toast(RecorderAbstraction.this.mContext, RecorderAbstraction.this.mContext.getString(C0248R.string.hdmi_file_path_not_canwriter));
+                        }
+                        //if (RecorderAbstraction.this.mRecoderListener != null) {
+                            //RecorderAbstraction.this.mRecoderListener.errorRecord();
+                            //return;
+                        //}
+                        return;
+                    case PREPARE:
+                        booleanValue = ((Boolean) message.obj).booleanValue();
+                        RecorderAbstraction.this.mHandler.removeMessages(PREPARE);
+                        RecorderAbstraction recorderInterface2 = RecorderAbstraction.this;
+                        recorderInterface2.mPrepareCount = recorderInterface2.mPrepareCount + 1;
+                        if (RecorderAbstraction.this.mPrepareCount >= 10 || RecorderAbstraction.this.isHdmiDisplay()) {
+                            RecorderAbstraction.this.mPrepareCount = 0;
+                            if (booleanValue) {
+                                RecorderAbstraction.this.prepareRecorder();
+                                return;
+                            } else {
+                                RecorderAbstraction.this.prepareUdp();
+                                return;
+                            }
+                        }
+                        RecorderAbstraction.this.mHandler.sendMessageDelayed(RecorderAbstraction.this.mHandler.obtainMessage(PREPARE, Boolean.valueOf(booleanValue)), PREPARETIME);
+                        return;
+                    default:
+                        return;
+                }
+            }
+        };
+    }
+
+    private void initRecordinfo() {
+        /*this.mRecordInfo.mResolution = ValuesSaveTool.getInt(this.mContext, ValuesSaveTool.RESOLUTION, 0);
+        this.mRecordInfo.mOutputFormat = ValuesSaveTool.getInt(this.mContext, ValuesSaveTool.OUTPUTFORMAT, 0);
+        this.mRecordInfo.mFrameRate = ValuesSaveTool.getInt(this.mContext, ValuesSaveTool.FRAMERATE, 0);
+        this.mRecordInfo.mBitRate = ValuesSaveTool.getInt(this.mContext, ValuesSaveTool.BITRATE, 0);
+        this.mRecordInfo.mSampleRate = ValuesSaveTool.getInt(this.mContext, ValuesSaveTool.SAMPLERATE, 1);
+        this.mRecordInfo.mChannelCount = ValuesSaveTool.getInt(this.mContext, ValuesSaveTool.CHANNELCOUNT, 0);
+        this.mRecordInfo.mType = ValuesSaveTool.getInt(this.mContext, ValuesSaveTool.OUTPUTMODE, 0);
+        this.mRecordInfo.mVideoLength = ValuesSaveTool.getLong(this.mContext, ValuesSaveTool.VIDEODURATION, 0);
+        this.mRecordInfo.mUDPType = ValuesSaveTool.getInt(this.mContext, ValuesSaveTool.UDPMODE, 0);
+        this.mRecordInfo.mMulticastIp = ValuesSaveTool.getString(this.mContext, ValuesSaveTool.MULTICAST_IP, RecordInfo.MULTICAST_IP);
+        this.mRecordInfo.mMulticastPort = ValuesSaveTool.getString(this.mContext, ValuesSaveTool.MULTICAST_PORT, RecordInfo.PORT);
+        this.mRecordInfo.mBroadcasePort = ValuesSaveTool.getString(this.mContext, ValuesSaveTool.BROADCAST_PORT, RecordInfo.PORT);
+        this.mRecordInfo.mOnetIp = ValuesSaveTool.getString(this.mContext, ValuesSaveTool.UNICAST_IP, RecordInfo.ONE_IP);
+        this.mRecordInfo.mOnePort = ValuesSaveTool.getString(this.mContext, ValuesSaveTool.UNICAST_PORT, RecordInfo.PORT);*/
+        if (this.mRecordInfo.mUDPType == 1) {
+            this.mRecordInfo.mIp = RecordInfo.BRODCAST_IP;
+            this.mRecordInfo.mPort = this.mRecordInfo.mBroadcasePort;
+        } else if (this.mRecordInfo.mUDPType == 0) {
+            this.mRecordInfo.mIp = this.mRecordInfo.mMulticastIp;
+            this.mRecordInfo.mPort = this.mRecordInfo.mMulticastPort;
+        } else {
+            this.mRecordInfo.mIp = this.mRecordInfo.mOnetIp;
+            this.mRecordInfo.mPort = this.mRecordInfo.mOnePort;
+        }
+    }
+
+    /*private void initResolution(boolean z) {
+        this.mResolutionInfoList.clear();
+        this.mResolutionInfoList.add(new ResolutionInfo());
+        if (z) {
+            Camera defaultCameraInstance = CameraHelper.getDefaultCameraInstance();
+            List supportedPreviewSizes = defaultCameraInstance.getParameters().getSupportedPreviewSizes();
+            if (supportedPreviewSizes != null) {
+                Collection arrayList = new ArrayList();
+                int size = supportedPreviewSizes.size() - 1;
+                while (size > 0) {
+                    try {
+                        Size size2 = (Size) supportedPreviewSizes.get(size);
+                        Log.d(TAG, "setHdmiConnectText Size = " + size2.width + " * " + size2.height);
+                        if (size2.width <= 1920) {
+                            ResolutionInfo resolutionInfo = new ResolutionInfo(size2.width, size2.height);
+                            if (resolutionInfo.mWidth == 3840 && resolutionInfo.mHeight == 2160) {
+                                this.mResolutionInfoList.add(resolutionInfo);
+                            } else if (resolutionInfo.mWidth == 1920 && resolutionInfo.mHeight == 1080) {
+                                this.mResolutionInfoList.add(resolutionInfo);
+                            } else if (resolutionInfo.mWidth == 1280 && resolutionInfo.mHeight == 720) {
+                                this.mResolutionInfoList.add(resolutionInfo);
+                            } else {
+                                arrayList.add(resolutionInfo);
+                            }
+                        }
+                        size--;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                this.mResolutionInfoList.addAll(arrayList);
+            }
+            defaultCameraInstance.release();
+        }
+        if (this.mRecordInfo.mResolution >= this.mResolutionInfoList.size()) {
+            this.mRecordInfo.mResolution = this.mResolutionInfoList.size() - 1;
+        }
+    }*/
+
+    public static boolean isConnect(Context context) {
+        Intent registerReceiver = context.registerReceiver(null, new IntentFilter(HDMIRxStatus.ACTION_HDMIRX_PLUGGED));
+        return registerReceiver != null ? registerReceiver.getBooleanExtra("state", false) : false;
+    }
+
+    private void prepareRecorder() {
+        if (startRecorder(false)) {
+            setRecording(true);
+            startCount();
+            //if (this.mRecoderListener != null) {
+                //this.mRecoderListener.startRecord();
+            //}
+            if (!isActivityDisPlay()) {
+                //MyToast.toast(this.mContext, this.mContext.getString(C0248R.string.start_record_hint));
+                return;
+            }
+            return;
+        }
+        stopRecorder();
+        //if (this.mRecoderListener != null) {
+            //this.mRecoderListener.errorRecord();
+        //}
+        if (!isActivityDisPlay()) {
+            //MyToast.toast(this.mContext, this.mContext.getString(C0248R.string.start_record_faile));
+        }
+    }
+
+    private void prepareUdp() {
+        startUdpStream();
+    }
+
+    private void show(boolean z) {
+        dismiss();
+        //this.mView = View.inflate(this.mContext, C0248R.layout.recording_icon_view, null);
+        /*this.mView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(RecorderAbstraction.this.mContext, RecordActivity.class);
+                intent.addFlags(268435456);
+                RecorderAbstraction.this.mContext.startActivity(intent);
+            }
+        });*/
+        //this.mCountView = (TextView) this.mView.findViewById(C0248R.id.recording_values);
+        //this.mTotalView = (TextView) this.mView.findViewById(C0248R.id.recording_total);
+        /*ImageView imageView = (ImageView) this.mView.findViewById(C0248R.id.recording_icon);
+        if (z) {
+            imageView.setImageResource(C0248R.drawable.recording_re);
+            this.mCountView.setText("00:00:00");
+            this.mTotalView.setText("/00:00:00");
+            this.mCountView.setVisibility(0);
+            this.mTotalView.setVisibility(0);
+        } else {
+            imageView.setImageResource(C0248R.drawable.recording_udp);
+            this.mCountView.setVisibility(8);
+            this.mTotalView.setVisibility(8);
+        }*/
+        /*this.mManager = (WindowManager) this.mContext.getSystemService("window");
+        WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(-2, -2, 2003, 2568, -3);
+        layoutParams.gravity = 53;
+        layoutParams.x = 20;
+        layoutParams.y = 20;
+        this.mManager.addView(this.mView, layoutParams);*/
+    }
+
+    private void startCount() {
+        this.mCount = -1;
+        this.mHandler.removeMessages(COUNT);
+        this.mHandler.sendEmptyMessage(COUNT);
+    }
+
+    public void checkRecord(final RecordInfo recordInfo) {
+        if (!isHdmiConnect()) {
+            //MyToast.toast(this.mContext, this.mContext.getString(C0248R.string.no_hdmi_signal_msg));
+            //if (this.mRecoderListener != null) {
+                //this.mRecoderListener.errorRecord();
+            //}
+        } else if (isUdp()) {
+            //MyToast.toast(this.mContext, this.mContext.getString(C0248R.string.be_udp_not_record));
+            //if (this.mRecoderListener != null) {
+                //this.mRecoderListener.errorRecord();
+            //}
+        } else {
+            new Thread(new Runnable() {
+                public void run() {
+                    File file;
+                    Exception e;
+                    //RecorderAbstraction.this.mHandler.sendEmptyMessageDelayed(HANDLE_IDENTIFING, 300);
+                    Log.d(RecorderAbstraction.TAG, "identify Uri:" + recordInfo.mIdentifier.getUri());
+                    IdentifyResult identify = BrowseUtils.identify(RecorderAbstraction.this.mContext, recordInfo.mIdentifier, 5);
+                    String uuid = recordInfo.mIdentifier.getUuid();
+                    recordInfo.isExfat = false;
+                    Iterator it = BoxModel.getModel(RecorderAbstraction.this.mContext, BoxModel.getBoxModel(RecorderAbstraction.this.mContext)).getDeviceList(2, true).iterator();
+                    while (it.hasNext()) {
+                        ZDevice zDevice = (ZDevice) it.next();
+                        if (zDevice.getBlock() != null && uuid.equals(zDevice.getBlock().getUuid())) {
+                            String type = zDevice.getBlock().getType();
+                            Log.d(TAG, "typeString ------------------- = " + type);
+                            if (type.equals("vfat")) {
+                                recordInfo.isExfat = true;
+                                break;
+                            }
+                        }
+                    }
+                    MyLog.m18v(RecorderAbstraction.TAG, "identify rusult:" + identify.getResult());
+                    if (identify.getResult() == 0) {
+                        recordInfo.mPath = identify.getPath();
+                        File file2 = new File(recordInfo.mPath);
+                        MyLog.m18v(RecorderAbstraction.TAG, "identify Path:" + recordInfo.mPath);
+                        try {
+                            file = new File(new StringBuilder(String.valueOf(recordInfo.mPath)).append("/").append(new StringBuilder(String.valueOf(System.currentTimeMillis())).toString()).toString());
+                            try {
+                                file.createNewFile();
+                            } catch (Exception e2) {
+                                e = e2;
+                                e.printStackTrace();
+                                if (file2.exists()) {
+                                }
+                                RecorderAbstraction.this.mHandler.obtainMessage(HANDLE_IDENTIF_FAIL, identify.getResult(), 1).sendToTarget();
+                                if (file == null) {
+                                    try {
+                                        if (!file.exists()) {
+                                            file.delete();
+                                            return;
+                                        }
+                                        return;
+                                    } catch (Exception e3) {
+                                        e3.printStackTrace();
+                                        return;
+                                    }
+                                }
+                                return;
+                            }
+                        } catch (Exception e32) {
+                            Exception exception = e32;
+                            file = null;
+                            e = exception;
+                            e.printStackTrace();
+                            if (file2.exists()) {
+                            }
+                            RecorderAbstraction.this.mHandler.obtainMessage(HANDLE_IDENTIF_FAIL, identify.getResult(), 1).sendToTarget();
+                            if (file == null) {
+                                return;
+                            }
+                            if (!file.exists()) {
+                                file.delete();
+                                return;
+                            }
+                            return;
+                        }
+                        if (file2.exists() || !file2.canWrite() || file == null || !file.exists()) {
+                            RecorderAbstraction.this.mHandler.obtainMessage(HANDLE_IDENTIF_FAIL, identify.getResult(), 1).sendToTarget();
+                        } else {
+                            RecorderAbstraction.this.mHandler.obtainMessage(HANDLE_IDENTIF_SUCCESS, Boolean.valueOf(true)).sendToTarget();
+                        }
+                        if (file == null) {
+                            return;
+                        }
+                        if (!file.exists()) {
+                            file.delete();
+                            return;
+                        }
+                        return;
+                    }
+                    RecorderAbstraction.this.mHandler.obtainMessage(HANDLE_IDENTIF_FAIL, identify.getResult(), 0).sendToTarget();
+                }
+            }).start();
+        }
+    }
+
+    public void checkUdp() {
+        if (!isHdmiConnect()) {
+            /*MyToast.toast(this.mContext, this.mContext.getString(C0248R.string.no_hdmi_signal_msg));
+            if (this.mRecoderListener != null) {
+                this.mRecoderListener.errorUdp();
+            }*/
+        } else if (isRecord()) {
+            /*MyToast.toast(this.mContext, this.mContext.getString(C0248R.string.be_recorded_not_udp));
+            if (this.mRecoderListener != null) {
+                this.mRecoderListener.errorUdp();
+            }*/
+        } else {
+            this.mHandler.removeMessages(HANDLE_IDENTIF_SUCCESS);
+            this.mHandler.obtainMessage(HANDLE_IDENTIF_SUCCESS, Boolean.valueOf(false)).sendToTarget();
+        }
+    }
+
+    public void cloneRecorderInfo() {
+        if (this.isReservation) {
+            this.mCurrentRecordInfo = (RecordInfo) this.mReservationsInfo.clone();
+        } else {
+            this.mCurrentRecordInfo = (RecordInfo) this.mRecordInfo.clone();
+        }
+    }
+
+    public void continueRecorder() {
+    }
+
+    public RecordInfo getCurrentRecordInfo() {
+        return this.mCurrentRecordInfo;
+    }
+
+    public RecordInfo getRecordInfo() {
+        return this.mRecordInfo;
+    }
+
+    public ResolutionInfo getResolution(int i) {
+        int size = this.mResolutionInfoList.size();
+        if (i >= 0 && i < size) {
+            return (ResolutionInfo) this.mResolutionInfoList.get(i);
+        }
+        this.mRecordInfo.mResolution = 0;
+        return new ResolutionInfo();
+    }
+
+    public ArrayList<ResolutionInfo> getResolution() {
+        if (this.mResolutionInfoList.size() == 0) {
+            this.mRecordInfo.mResolution = 0;
+            this.mResolutionInfoList.add(new ResolutionInfo());
+        }
+        return this.mResolutionInfoList;
+    }
+
+    public int getType() {
+        return this.mType;
+    }
+
+    public void hdmiConncet(boolean z) {
+    }
+
+    public void initHdmiConnect() {
+        if (this.mHdmiRxHotPlugReceiver == null) {
+            this.mHdmiRxHotPlugReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    boolean booleanExtra = intent.getBooleanExtra("state", false);
+                    Log.d(RecorderAbstraction.TAG, "RecorderAbstraction onReceive hdmiRxPlugged = " + booleanExtra);
+                    RecorderAbstraction.this.isHdmiConnect = booleanExtra;
+                    RecorderAbstraction.this.initResolution(booleanExtra);
+                    /*if (RecorderAbstraction.this.mRecoderListener != null) {
+                        RecorderAbstraction.this.mRecoderListener.hdmiConncet(booleanExtra);
+                    }*/
+                    RecorderAbstraction.this.hdmiConncet(booleanExtra);
+                    if (booleanExtra) {
+                        if (RecorderAbstraction.this.isUdping) {
+                            RecorderAbstraction.this.startUdpStream();
+                        }
+                    } else if (RecorderAbstraction.this.isRecording) {
+                        RecorderAbstraction.this.stopRecord();
+                    }
+                }
+            };
+            this.isHdmiConnect = isConnect(this.mContext);
+            this.mContext.registerReceiver(this.mHdmiRxHotPlugReceiver, new IntentFilter(HDMIRxStatus.ACTION_HDMIRX_PLUGGED));
+        }
+    }
+
+    public boolean isActivityDisPlay() {
+        return this.isActivityDisPlay;
+    }
+
+    public boolean isHdmiConnect() {
+        return this.isHdmiConnect;
+    }
+
+    public boolean isHdmiDisplay() {
+        return false;
+    }
+
+    public boolean isPip() {
+        return this.isPiping;
+    }
+
+    public boolean isPrepare() {
+        return false;
+    }
+
+    public boolean isRecord() {
+        return this.isRecording;
+    }
+
+    public boolean isRecordBackground() {
+        return this.mType == RECORDING_BACKGROUND;
+    }
+
+    public boolean isRecordCrame() {
+        return this.mType == RECORDING_CRAME;
+    }
+
+    public boolean isRecordSourceIn() {
+        return this.mType == RECORDING_SOURCE_IN;
+    }
+
+    public boolean isUdp() {
+        return this.isUdping;
+    }
+
+    public void onDestroy() {
+        this.mContext.unregisterReceiver(this.mHdmiRxHotPlugReceiver);
+        this.mHdmiRxHotPlugReceiver = null;
+    }
+
+    public abstract void release();
+
+    public void repeatDisPlay() {
+    }
+
+    public void setActivityDisPlay(boolean z) {
+        this.isActivityDisPlay = z;
+    }
+
+    public void setPip(boolean z) {
+        this.isPiping = z;
+    }
+
+/*    public void setRecordListener(RecoderListener recoderListener) {
+        this.mRecoderListener = recoderListener;
+    }*/
+
+    public void setRecording(boolean z) {
+        this.isRecording = z;
+        if (z) {
+            show(true);
+        } else {
+            dismiss();
+        }
+    }
+
+    public void setReservationsRecord(RecordInfo recordInfo) {
+        this.mReservationsInfo = recordInfo;
+    }
+
+    public void setSurfaceSize(int i, int i2) {
+    }
+
+    public void setSurfaceViewRootView(int i, int i2, int i3, int i4) {
+    }
+
+    public void setSurfaceViewRootView(ViewGroup viewGroup, int i, int i2) {
+    }
+
+    public void setUdpFlag(boolean z) {
+        this.isUdping = z;
+    }
+
+    public void setUdping(boolean z) {
+        this.isUdping = z;
+        if (z) {
+            show(false);
+        } else {
+            dismiss();
+        }
+    }
+
+    public abstract boolean startDisPlayHdmi();
+
+    public void startPip() {
+    }
+
+    public void startRecord() {
+        this.isReservation = false;
+        checkRecord(this.mRecordInfo);
+    }
+
+    public abstract boolean startRecorder(boolean z);
+
+    public void startReservationRecord() {
+        this.isReservation = true;
+        checkRecord(this.mReservationsInfo);
+    }
+
+    public void startReservationUdp() {
+        this.isReservation = true;
+        checkUdp();
+    }
+
+    public void startUdp() {
+        this.isReservation = false;
+        checkUdp();
+    }
+
+    public void startUdpStream() {
+    }
+
+    public abstract boolean stopDisPlayHdmi();
+
+    public boolean stopPip() {
+        return false;
+    }
+
+    public boolean stopRecord() {
+        this.mHandler.removeMessages(COUNT);
+        this.mHandler.removeMessages(CONTINUERECORDER);
+        Log.d(TAG, "RecorderInterface---stopRecord");
+        stopRecorder();
+        this.isRecording = false;
+        /*if (this.mRecoderListener != null) {
+            this.mRecoderListener.stopRecord();
+        }*/
+        if (!isActivityDisPlay()) {
+            //MyToast.toast(this.mContext, this.mContext.getString(C0248R.string.stop_record_hint));
+        }
+        return false;
+    }
+
+    public abstract boolean stopRecorder();
+
+    public boolean stopUdp() {
+        stopUdpStream();
+        this.isUdping = false;
+        /*if (this.mRecoderListener != null) {
+            this.mRecoderListener.stopUdp();
+        }*/
+        if (!isActivityDisPlay()) {
+            //MyToast.toast(this.mContext, this.mContext.getString(C0248R.string.stop_udp_hint));
+        }
+        return false;
+    }
+
+    public boolean stopUdpStream() {
+        return false;
+    }
+}
