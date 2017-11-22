@@ -55,6 +55,12 @@ The following steps helped me to resolve HDMI glowing issues:
 The following steps helped me to resolve fuzzy HDMI output:
  * Change HDMI input resolution to 1920x1080.
 
+Streaming over WIFI:
+ * Using a LEDE (OpenWRT) WIFI AP and add the following setting:
+    *  In "```/etc/config/wireless```" add to the AP "```option isolate '1'```".
+    * See [Wifi configuration](https://lede-project.org/docs/user-guide/wifi_configuration) for details.
+
+
 ## Measurements
 
 I have measued the display delay when using the Zidoo Box. The following measurements are an average of 5 measurements:
@@ -73,6 +79,21 @@ VLC network cache below 250ms was not working.
 The computer running VLC used a USB 3.0 Gigabit network adapter.
 
 ## Internals
+
+### Hardware
+See ```Teardown``` folder for pictures.
+ * Zidoo X8 and X9s use the same mainboard. The Zidoo X8 board is marked on the PCB as X9s.
+ * Connector on board marked with 3.3V, TX, RX, GND (UART? untested) betwen USB3 and SATA port.
+ * Power supply:
+   * Zidoo X8 marked with 12V 1.5A
+   * Zidoo X9s marked with 12V 3A. The additional 1.5A must be for the SATA disk.
+ * Zidoo X8 board is mounted upside down on the top of the case. On the base is a weight of 45g. Removing it reduces the total weight from 315g to 270g.
+ * Zidoo X9s weight is 430g due to the metal case.
+ * WI-FI:
+   * Zidoo X8 one internal fixed and one external fixed Antenna.
+   * Zidoo X9s two external detachable Antenna.
+   * Antennas connected to PCB via u.fl(?) connector.
+   * Chip RTL8821AU (1x1 ac)
 
 ### Zidoo Online Updater
 

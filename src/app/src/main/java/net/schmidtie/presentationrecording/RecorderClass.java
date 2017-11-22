@@ -4,21 +4,16 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.OperationApplicationException;
-import android.graphics.PixelFormat;
 import android.graphics.SurfaceTexture;
 import android.os.Handler;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
-import android.support.v4.view.ViewCompat;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.RelativeLayout;
 
 import com.realtek.hardware.RtkHDMIRxManager;
@@ -26,16 +21,12 @@ import com.realtek.server.HDMIRxParameters;
 import com.realtek.server.HDMIRxStatus;
 
 import net.schmidtie.presentationrecording.info.ResolutionInfo;
-import net.schmidtie.util.FileUtil;
 import net.schmidtie.util.Hdmi;
 import net.schmidtie.util.Tuple;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Random;
 
 class RecorderClass {
     private static final String TAG = "RecorderClass";
@@ -53,6 +44,7 @@ class RecorderClass {
     private BroadcastReceiver HdmiRxHotPlugReceiver = null;
     private RtkHDMIRxManager HDMIRxManager = null;
     private Handler MessageHandler = null;
+    private OutputWriter mOutputWriter = null;
 
     private final static int MESSAGE_DISPLAY = 0;
     private final static int MESSAGE_HDMI_CHANGED = 1;
@@ -85,6 +77,7 @@ class RecorderClass {
     }
 
     private void init() {
+        mOutputWriter = new OutputWriter(this.mContext, this);
         initHDMIRxManager();
         initView();
         MessageHandler = new Handler() {
@@ -144,6 +137,7 @@ class RecorderClass {
                             if (StateChange != null) {
                                 StateChange.StartRecording();
                             }
+                            mOutputWriter.StartWritingOutput();
                             CurrentState.HdmiRecordTime = 0;
                             MessageHandler.sendEmptyMessageDelayed(MESSAGE_TIMER, MESSAGE_TIMER_TIME);
                         }
@@ -156,7 +150,7 @@ class RecorderClass {
                                 && CurrentState.HdmiVideoRecording) {
                             CurrentState.HdmiRecordTime = CurrentState.HdmiRecordTime + 1;
 
-                            try {
+                            /*try {
                                 String str = CurrentState.HdmiRecordPath + File.separator + CurrentState.HdmiRecordFile;
                                 File file = new File(str);
                                 long fileSize = file.length();
@@ -169,9 +163,9 @@ class RecorderClass {
                                 }
                             } catch (Exception ex) {
                                 Log.e(TAG, "Failed restarting recording.", ex);
-                            }
+                            }*/
 
-                            MessageHandler.sendEmptyMessageDelayed(MESSAGE_TIMER, MESSAGE_TIMER_TIME);
+                            //MessageHandler.sendEmptyMessageDelayed(MESSAGE_TIMER, MESSAGE_TIMER_TIME);
                         }
                     }
                     default:
@@ -485,6 +479,31 @@ class RecorderClass {
         Log.d(TAG, "startRecord");
         if (HDMIRxManager != null && CurrentState.HdmiVideo && !Hdmi.isHdcp()) {
             try {
+                DesireState.HdmiRecordPath = null;
+                File[] RecordLocations = mContext.getExternalFilesDirs(null);
+                Log.d(TAG, "Possible Record Locations:" + RecordLocations.length);
+                long bestRecordLocation = -1;
+                for (int rli = 0; rli < RecordLocations.length; rli++) {
+                    File RecordLocation = RecordLocations[rli];
+                    if (DesireState.HdmiRecordToDeviceAllowed == false
+                            && RecordLocation.getAbsolutePath().contains("/0/")) {
+                        Log.d(TAG, "Record Location " + rli + " is local (excluded).");
+                    } else {
+                        long RecordLocationFreeSpace = RecordLocation.getFreeSpace();
+                        if (RecordLocationFreeSpace > bestRecordLocation) {
+                            DesireState.HdmiRecordPath = RecordLocation;
+                        }
+                        Log.d(TAG, "Record Location " + rli + ": Absolute Path " + RecordLocation.getAbsolutePath());
+                        Log.d(TAG, "Record Location " + rli + ": Free Space " + RecordLocationFreeSpace + " bytes");
+                    }
+                }
+
+                ParcelFileDescriptor prepareIO = mOutputWriter.prepareIO(this.DesireState);
+                if (prepareIO == null) {
+                    Log.d(TAG, "mOutputWriter.prepareIO() == null");
+                    return false;
+                }
+
                 int width = 1920;
                 int height = 1080;
                 //RecordInfo currentRecordInfo = getCurrentRecordInfo();
@@ -504,8 +523,7 @@ class RecorderClass {
                 RtkHDMIRxManager.AudioConfig audioConfig = new RtkHDMIRxManager.AudioConfig(intValue, intValue2, i);
                 HDMIRxManager.configureTargetFormat(videoConfig, audioConfig);
 
-                int FileFormat = RtkHDMIRxManager.HDMIRX_FILE_FORMAT_TS;
-                String recordFolder = FileUtil.GetStorageFolder();
+                /*String recordFolder = FileUtil.GetStorageFolder();
                 if (recordFolder == null)
                     recordFolder = "/storage/emulated/0";
                 recordFolder = recordFolder + File.separator + "hdmi";
@@ -520,10 +538,14 @@ class RecorderClass {
                 File file = new File(str);
                 file.createNewFile();
                 FileUtil.ChangeFileToFullAcess(str);
-
-                HDMIRxManager.setTargetFd(ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_APPEND | ParcelFileDescriptor.MODE_WRITE_ONLY), FileFormat);//939524096
+*/
+                //HDMIRxManager.setTargetFd(ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_APPEND | ParcelFileDescriptor.MODE_WRITE_ONLY), FileFormat);//939524096
+                HDMIRxManager.setTargetFd(prepareIO, DesireState.HdmiFileFormat);
                 HDMIRxManager.setTranscode(true);
 
+                CurrentState.HdmiRecordToDeviceAllowed = DesireState.HdmiRecordToDeviceAllowed;
+                CurrentState.HdmiRecordPath = DesireState.HdmiRecordPath;
+                CurrentState.HdmiFileFormat = DesireState.HdmiFileFormat;
                 CurrentState.HdmiVideoRecording = true;
 
                 return true;
@@ -535,16 +557,21 @@ class RecorderClass {
         return false;
     }
 
+    public boolean IsHdmiVideoRecording() {
+        return CurrentState.HdmiVideoRecording;
+    }
+
     public boolean stopRecord() {
         Log.d(TAG, "stopRecord");
+        CurrentState.HdmiVideoRecording = false;
         try {
             if (HDMIRxManager != null) {
                 HDMIRxManager.setTranscode(false);
             }
         } catch (Exception ex) {
+            ex.printStackTrace();
             Log.e(TAG, "Error during stopRecord", ex);
         }
-        CurrentState.HdmiVideoRecording = false;
         return true;
     }
 
