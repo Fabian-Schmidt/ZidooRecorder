@@ -1,4 +1,4 @@
-# Project Title
+# Presentation Recording
 
 Use the RTD1295 based Zidoo X8 / X9s to record any incoming HDMI to USB and broadcast via network (UDP, TS, H264).
 
@@ -83,7 +83,7 @@ The computer running VLC used a USB 3.0 Gigabit network adapter.
 ### Hardware
 See ```Teardown``` folder for pictures.
  * Zidoo X8 and X9s use the same mainboard. The Zidoo X8 board is marked on the PCB as X9s.
- * Connector on board marked with 3.3V, TX, RX, GND (UART? untested) betwen USB3 and SATA port.
+ * Connector on board marked with 3.3V, TX, RX, GND (UART) betwen USB3 and SATA port.
  * Power supply:
    * Zidoo X8 marked with 12V 1.5A
    * Zidoo X9s marked with 12V 3A. The additional 1.5A must be for the SATA disk.
@@ -94,6 +94,10 @@ See ```Teardown``` folder for pictures.
    * Zidoo X9s two external detachable Antenna.
    * Antennas connected to PCB via u.fl(?) connector.
    * Chip RTL8821AU (1x1 ac)
+
+### UART
+See file ```Zidoo X8 bootlog.txt```.
+OpenWRT console on UART after startup.
 
 ### Zidoo Online Updater
 

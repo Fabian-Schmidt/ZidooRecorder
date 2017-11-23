@@ -1,0 +1,495 @@
+
+C1:80000000
+C2
+?
+C3hswitch frequency to 0x00000046
+frequency divider is 0x00000080
+switch frequency to 0x00000046
+frequency divider is 0x00000004
+switch to SDR 8 bit
+switch bus width to 0x00000008 bits success
+
+hwsetting size: 000005E0
+C4
+f 
+5-5
+Goto FSBL: 0x10100000
+<=============================================>
+fsbl_main: sys_secure_type = 0x0000BEEE
+fsbl_main: sys_boot_type = 0x00000002
+fsbl_main: sys_boot_enc = 0x00000000
+fsbl_main: sys_bisr_done = 0x00000000
+sys_hwsetting_size:00000600
+sys_bootcode_size:000B21C0
+sys_secure_fsbl_size:00010B80
+sys_secure_os_size:00067B00
+sys_bl31_size:00005040
+sys_rsa_key_fw_size:00000000
+sys_rsa_key_tee_size:00000000
+sys_rescue_size:00000000
+
+HwSetting:
+hwsetting_blk_no:00000100
+hwsetting_total_size:00000680
+hwsetting_blk_count:00000004
+
+Bootcode:
+bootcode_blk_no:00000104
+bootcode_total_size:000B21E0
+bootcode_blk_count:00000591
+
+FSBL:
+secure_fsbl_blk_no:00000695
+secure_fsbl_total_size:00010BA0
+secure_fsbl_blk_count:00000086
+
+TEE OS:
+secure_os_blk_no:0000071B
+secure_os_total_size:00067B20
+secure_os_blk_count:0000033E
+
+BL31:
+bl31_blk_no:00000A59
+bl31_total_size:00005060
+bl31_blk_count:00000029
+
+RSA Key Fw:
+rsa_key_fw_blk_no:00000A82
+rsa_key_fw_total_size:00000000
+rsa_key_fw_blk_count:00000000
+
+RSA Key TEE:
+rsa_key_tee_blk_no:00000A82
+rsa_key_tee_total_size:00000000
+rsa_key_tee_blk_count:00000000
+
+Rescue:
+rescue_blk_no:00000A82
+rescue_total_size:00000000
+rescue_blk_count:00000000
+********** FW_TYPE_GOLD_TEE **********
+fwInfo->fwType: 00000023
+fwInfo->isGolden: 00000001
+fwInfo->ddrReadAddr: 00520000
+fwInfo->ddrDestAddr: 10200000
+fwInfo->flashType: 00000002
+fwInfo->flashUnitSize: 00000200
+fwInfo->flashOffset: 000E3600
+fwInfo->dataSize: 00067B20
+body_size:00067B00
+flash_unit_no:0000071B
+flash_unit_count:0000033E
+real_size:00067AEC
+sha256 Fw 
+********** FW_TYPE_GOLD_BL31 **********
+fwInfo->fwType: 00000028
+fwInfo->isGolden: 00000001
+fwInfo->ddrReadAddr: 00520000
+fwInfo->ddrDestAddr: 10120000
+fwInfo->flashType: 00000002
+fwInfo->flashUnitSize: 00000200
+fwInfo->flashOffset: 0014B200
+fwInfo->dataSize: 00005060
+body_size:00005040
+flash_unit_no:00000A59
+flash_unit_count:00000029
+real_size:00005018
+sha256 Fw 
+********** FW_TYPE_BOOTCODE **********
+fwInfo->fwType: 00000001
+fwInfo->isGolden: 00000001
+fwInfo->ddrReadAddr: 00520000
+fwInfo->ddrDestAddr: 00020000
+fwInfo->flashType: 00000002
+fwInfo->flashUnitSize: 00000200
+fwInfo->flashOffset: 00020800
+fwInfo->dataSize: 000B21E0
+body_size:000B21C0
+flash_unit_no:00000104
+flash_unit_count:00000591
+real_size:000B2180
+sha256 Fw 
+j bootcode jump address:00020000
+64b
+
+
+U-Boot 2012.07 (Aug 13 2016 - 10:06:21)
+
+CPU  : Cortex-A53 quad core - AARCH32
+Board: Realtek QA Board
+DRAM:  0 Bytes
+Watchdog: Disabled
+Cache: Enabled
+Non-Cache Region: 1 MB@0x07900000
+MMC:   rtk_emmc : Detect chip rev. >= B
+RTD1295 eMMC: 0
+rtk_emmc : Detect chip rev. >= B
+mmc->version=0x00010000
+version=0x00000004
+[LY] cardtype=57, mmc->card_caps=0f
+[LY] freq = 00464388, clk diver = 00000080
+[LY] speed up emmc at HS-200 
+[LY] HS-200 bus width=2
+[LY] mmc->boot_caps = 20b
+TEMP TX_WINDOW=0x7fffffdc, TX_best=0x12 
+RX_WINDOW=0xfffff80f, RX_best=0x17 
+TX1_WINDOW=0x7fffff80, TX_best=0x12 
+[LY] hs200 : 0
+[HC] WPG_SIZE = 4194304
+Device: RTD1295 eMMC
+Manufacturer ID: 11
+OEM: 100
+Name: 008G7 
+Tran Speed: 5f5e100
+Rd Block Len: 512
+MMC version 4.0
+High Capacity: No
+Capacity: 7.3 GiB
+Bus Width: 8-bit
+Speed: HS200
+Factory: MMC
+Factory: pp:0, seq#:0x13, size:0x25a00
+------------tmp/factory/000BootParam.h found
+[logo]src w/h=1280/720 dst w/h=3840/2160
+In:    serial
+Out:   serial
+Err:   serial
+Net:   Realtek PCIe GBE Family Controller mcfg = 0024
+dev->name=r8168#0
+Hit Esc or Tab key to enter console mode or rescue linux:  0 
+------------can't find tmp/factory/recovery
+======== Checking into android recovery ====
+
+Start Boot Setup ... 
+---------------LOAD  NORMAL FW  TABLE ---------------
+[INFO] fw desc table base: 0x00620000, count: 22
+Normal boot fw follow...
+Kernel:
+	 FW Image to 0x03000000, size=0x00f96c00 (0x03f96c00)
+	 FW Image fr 0x02c42000 
+original DT address=2100000
+DT:
+	 FW Image to 0x01f00000, size=0x00010068 (0x01f10068)
+	 FW Image fr 0x028b0200 
+Audio FW:
+	 FW Image to 0x01b00000, size=0x00351c78 (0x01e51c78)
+	 FW Image fr 0x028f0200 
+IMAGE FILE:
+	 FW Image to 0x1e800000, size=0x00384000 (0x1eb84000)
+	 FW Image fr 0x199002000 
+Start A/V Firmware ...
+[FW]kylin_bring up hwsetting
+Finish kylin_bring_temp hwsetting
+[+][AO][aio_HWEnable]
+[AO]aio_CRTOn:
+SYS_CLOCK_ENABLE1 [ 0x9800000c]: 0x13dec561
+SYS_CLOCK_ENABLE2 [ 0x98000010]: 0x58ffe416
+SYS_SOFT_RESET1 [ 0x98000000]: 0xb7da1001
+SYS_SOFT_RESET4 [ 0x98000050]: 0x0000801f
+[AO]ao_SetDACAnalogOn:
+TVE_VDAC_CTR1 [ 0x980183a0]: 0xa86c0280
+AIO_O_ACANA_GCTL1 [ 0x98E0X0P6O6R0T4 ]E:N V0 xA2T4 905x115000400
+0A0I0O_I
+_rAtCkA_NpAr_eAlDoCa_dG_CbToLo2t i[m a0gxe98s0 0:6 6l1o0a]d:  U0-xB8o8o0ta 36a40 0fr
+oAmIO _0Ix_0A0D0C2_8T1C2O5N  [t o0 x09x8001056060f0c0]:0  0wxi2t2h1 fs0i0z0e0 0
+xA0I0O1_0I0_0A0D0C_
+TCON [ 0x980066fc]: 0x221fff00
+[-][AO][aio_HWEnable]
+[Audio]SetTickRate  0x000000c8
+[ACPU] Set protect, start: 0x00000000 end: 0x00001000 moduleid:6
+HDMI Raw Enable: MPG AC3 DTS MPEG2 AAC DDP WMAPRO MLP 
+
+SPDIF Raw Enable: MPG AC3 DTS MPEG2 AAC DDP WMAPRO MLP 
+
+Force 2ch Format: DTS DTSHD AC3 DDP MLP AAC WMAPRO 
+
+
+@@@@@@@One Step TV System magic number = 0xffffffff, addr = 0xa001f800@@@@@@@
+[AUDIO WARNING] ERR UNCACHEABLE_VADDR  0xb8071200 @  0x81b2e538
+
+@@@@One Step magic number not match! use fw default TV System!
+[@@VIDEO_RPC_VOUT_ToAgent_ConfigTVSystem_0_svc]type 0!
+HDMIOff = 0
+[VO]vo->is_hdmi_off_clock_on:88176
+[@@VIDEO_RPC_VOUT_ToAgent_ConfigVideoStandard_0_svc]
+[VO_SetVideoStandard]st 25 p 1 1 0
+[VO_SetVideoStandard]ped 1 data0  0x00000004 data1  0x0000c0o0p0y0_2
+n[dV_Ob_oSoettlVoiaddeeorS_taanndda_rrdu]nH D:M Isorfcf: 00x 0is1_5t0ve0_0o0n0 ,1  dusste:r0_xc0v0b0s2_1o0f0f0 ,0 s
+livzdes:.0foxr0m0a0tb 100 0p0or
+tJ_suemtptiinngg   t0ox 0020n0d03 8b1o oltvldosa_dwebr .0..
+[
+VO setTVStandard 25 3D 0 0]
+
+(TVE) TVE_DAC_mode 0,cmd->enProg 1!!
+TV_NTSC_J
+~~comp 0, ch2 1, mode_3D 0!!
+~~comp 0, ch2 1, mode_3D 0!!
+~~TVE standard#
+SetVideoStandard return!
+[@@VIDEO_RPC_VOUT_ToAgent_ConfigHdmiInfoFrame_0_svc]
+
+(VO_ConfigHDMI_InfoFrame) L:236, is_hdmi_plugin 1, hdmiMode 1!!Mode 1 dataByte1  0x00000040  0x000000a8  0x00000000
+dataByte4  0x00000000  0x00000000 int0  0x00000001
+
+(HDMI_3D) mode 1, HDMI_gen 1, En_3D 0, Format_3D 0 scramble:0!!clearDynamicRangeMasteringPkt()
+
+ go back SET_HDMI!!boot_info  0xa001f600 magic  0x2452544b en 1
+boot_info.w 1280 h 720
+boot_addr  0x1e800000
+w 1280, h 720, img0  0x1e800000, pitch0 5120
+disp.x 0 y 0 w 1920 h 1080
+PowerOnOSD~~
+[AO][_AO_if_video_HDMI_mode]HDMI not enabled
+[AO][+]_AO_setup_default_audio_infoframe
+[AO][--]_AO_hdmi_disable(0)
+[AUDIO WARNING] 
+[AO][_AO_hdmi_disable]do nothing, HDMI not enable  0x00000000  0x00000001
+Audio_Channel_Count 1 :2CH, audio_layout:0
+HDMI_Frequency 148 :1080p50,1080p60
+Sampling_Frequency 3 :48K
+CTS = 148500, N = 6144
+[+][HDMI_gen_audio_infoframe]
+CA:2CH: L,R
+[-][HDMI_gen_audio_infoframe]
+SYS_PLL_PSAUDA1 [ 0x98000130]: 0x0050022d
+[AO][++]_AO_hdmi_enable(0)
+[AUDIO WARNING] 
+[AO][_AO_hdmi_enable]do nothing, HDMI not enable  0x00000000  0x00000001
+[AO][-]_AO_setup_default_audio_infoframe
+
+
+U-Boot 2015.07-ge1162f1 (Aug 02 2016 - 11:24:56 +0800)
+
+CPU  : Cortex-A53 Quad Core
+Board: Realtek QA Board
+[ERR] get_accessible_ddr_size: hw setting error. (impossible value 0x0)
+[ERR] Fall back to using CONFIG_SYS_RAM_DCU1_SIZE
+DRAM:  1 GiB
+mapping memory 0x20000000-0x40000000 non-cached
+In:    serial
+Out:   serial
+Err:   serial
+Hit any key to stop autoboot:  0 
+rtk_plat_set_fw not port yet, use default configs
+## Flattened Device Tree blob at 01f00000
+   Booting using the fdt blob at 0x1f00000
+   reserving fdt memory region: addr=0 size=30000
+   reserving fdt memory region: addr=1f000 size=1000
+   reserving fdt memory region: addr=30000 size=d0000
+   reserving fdt memory region: addr=3200000 size=b800000
+   reserving fdt memory region: addr=1b00000 size=400000
+   reserving fdt memory region: addr=2600000 size=c00000
+   reserving fdt memory region: addr=1ffe000 size=4000
+   reserving fdt memory region: addr=11000000 size=9200000
+   reserving fdt memory region: addr=10000000 size=14000
+   reserving fdt memory region: addr=2200000 size=400000
+   Using Device Tree in place at 0000000001f00000, end 0000000001f13067
+Bring UP slave CPUs
+Jump to BL31 entrypoint
+VERBOSE: bl31_setup
+NOTICE:  BL31: v1.2(debug):415dc83
+NOTICE:  BL31: Built : 11:30:42, Jun 30 2016
+INFO:    BL31: Initializing runtime services
+INFO:    Start to init service std_svc 
+INFO:    Finish to init service std_svc 
+INFO:    Start to init service opteed_fast 
+INFO:    Finish to init service opteed_fast 
+INFO:    BL31: Initializing BL32
+ERROR:   Core_0 TEESMC_OPTEED_RETURN_ENTRY_DONE 
+ERROR:   Core_0 got optee_vectors (0x1020093c)
+INFO:    BL31: Initialized BL32
+INFO:    EXIT BL31
+INFO:    bl31_to_kernel: kernel_resume_entry = 0x1e000
+INFO:    bl31 jumps to EL2 entry 
+[    0.000000] Booting Linux on physical CPU 0x0
+[    0.000000] Initializing cgroup subsys cpuset
+[    0.000000] Initializing cgroup subsys cpu
+[    0.000000] Initializing cgroup subsys cpuacct
+[    0.000000] Linux version 4.1.17-g26a590a-dirty (maifanghao@ZidooServer) (gcc version 4.9.4 (OpenWrt/Linaro GCC 4.9-2015.06 r47591) ) #10 SMP PREEMPT Sat Aug 19 15:05:06 CST 2017
+[    0.000000] Detected VIPT I-cache on CPU0
+[    0.000000] alternatives: enabling workaround for ARM erratum 845719
+[    0.000000] [1;33mDT: cma-improve=0[m
+[    0.000000] earlycon: Early serial console at MMIO32 0x98007800 (options '')
+[    0.000000] bootconsole [uart0] enabled
+WARNING: NO PSCI SERVICE: 0x84000000 
+WARNING: NO PSCI SERVICE: 0x84000006 
+WARNING: NO PSCI SERVICE: 0x8400000a 
+WARNING: NO PSCI SERVICE: 0x8400000a 
+[    0.000000] WARNING: x1-x3 nonzero in violation of boot protocol:
+[    0.000000] 	x1: 0000000001f00000
+[    0.000000] 	x2: 00000000000003c9
+[    0.000000] 	x3: 0000000000000005
+[    0.000000] This indicates a broken bootloader or old kernel
+VVVEEERRRBBBOOOSSSEEE:::   bbblll333111___ssseeetttuuuppp
+
+
+NNNOOOTTTIIICCCEEE:::      BBBLLL333111:::   vvv111...222(((dddeeebbbuuuggg))):::444111555dddccc888333
+
+
+NNNOOOTTTIIICCCEEE:::      BBBLLL333111:::   BBBuuuiiilllttt   :::   111111:::333000:::444222,,,   JJJuuunnn   333000   222000111666
+
+
+IIINNNFFFOOO:::            BBBLLL333111:::   IIInnniiitttiiiaaallliiizzziiinnnggg   rrruuunnntttiiimmmeee   ssseeerrrvvviiiccceeesss
+
+
+IIINNNFFFOOO:::            SSStttaaarrrttt   tttooo   iiinnniiittt   ssseeerrrvvviiiccceee   ssstttddd___sssvvvccc   
+
+
+IIINNNFFFOOO:::            FFFiiinnniiissshhh   tttooo   iiinnniiittt   ssseeerrrvvviiiccceee   ssstttddd___sssvvvccc   
+
+
+IIINNNFFFOOO:::            SSStttaaarrrttt   tttooo   iiinnniiittt   ssseeerrrvvviiiccceee   ooopppttteeeeeeddd___fffaaasssttt   
+
+
+IIINNNFFFOOO:::            FFFiiinnniiissshhh   tttooo   iiinnniiittt   ssseeerrrvvviiiccceee   ooopppttteeeeeeddd___fffaaasssttt   
+
+
+IIINNNFFFOOO:::            BBBLLL333111:::   IIInnniiitttiiiaaallliiizzziiinnnggg   BBBLLL333222
+
+
+EEERRRRRROOORRR:::         CCCooorrreee___321   TTTEEEEEESSSMMMCCC___OOOPPPTTTEEEEEEDDD___RRREEETTTUUURRRNNN___EEENNNTTTRRRYYY___DDDOOONNNEEE   
+
+
+IIINNNFFFOOO:::            BBBLLL333111:::   IIInnniiitttiiiaaallliiizzzeeeddd   BBBLLL333222
+
+
+IIINNNFFFOOO:::            EEEXXXIIITTT   BBBLLL333111
+
+
+IIINNNFFFOOO:::            bbblll333111___tttooo___kkkeeerrrnnneeelll:::   kkkeeerrrnnneeelll___rrreeesssuuummmeee___eeennntttrrryyy   ===   000xxx111eee000000000
+
+
+IIINNNFFFOOO:::            bbblll333111   jjjuuummmpppsss   tttooo   EEELLL222   eeennntttrrryyy   
+
+
+[    0.268701] bl31_set_tee_protect !!! 
+INFO:    Non-Secure Boot: no action !! 
+[    0.276313] bl31_set_tee_protect ret = 0 
+[    0.706171] ****** rtk_lockapi_init 597, chip: id=0x00000000, revision=0x00010000
+TVE_setDAC 2485,  0xd48bd400
+[    2.830300] rtk-usb-power-manager 98000000.rtk_usb_power_manager: rtk_dwc3_u2host status is okay
+[    2.840232] rtk-usb-power-manager 98000000.rtk_usb_power_manager: ehci status is okay
+[    2.849061] rtk-usb-power-manager 98000000.rtk_usb_power_manager: ohci status is okay
+[    2.864344] rtk-usb-power-manager 98000000.rtk_usb_power_manager: create_debug_files
+[    3.358932] [RTD129x PCIE Slot2] 9803b000.pcie2: PCIE device has link down in slot 2
+[    3.367661] [RTD129x PCIE Slot2] 9803b000.pcie2: rtk_pcie2_hw_initial fail
+[    3.589313] [RTD129x PCIE Slot1] 9804e000.pcie: PCIE device has link down in slot 1
+[    3.597944] [RTD129x PCIE Slot1] 9804e000.pcie: rtk_pcie_hw_initial fail
+[    3.610228] rtk119x-ir 98007000.irda: [rtk119x_ir_probe]: can't get multiple support from dtb, set to default->not support
+
+[ROS: openRPC() intr_scpu_dev_r buf  0x00e2ffa1 s  0x00e2ffa1 e  0x00e4ffa1 i  0x00e2ffa1
+[ROS: openStubRPC() intr_w buf  0x00e6ffa1 s  0x00e6ffa1 e  0x00e8ffa1 i  0x00e6ffa1[AVCPU] Set Debug level flag  0x81e03dac *flag  0x01df51e0 ucache  0xa1df51e0 
+[AVCPU] Set Debug level *ptrDebugFlag  0x00000001 
+-------------------
+Audio Version = 160345 (Kylin)
+Common Version = 0
+Binary src compiled at Aug  3 2017 14:39:32
+Note = 
+-------------------
+
+
+
+
+[A] gloabl malloc size  0x003ffeb8 
+[    3.687646] AudioIntrRead:143 can't find process for handling AudioIntrRead programID:98
+[    3.696878] AudioIntrRead: program:98 version:0 procedure:1 taskID:0 sysTID:4294967295 sysPID:4294967295 size:4 context:81e0357d atomic
+[    3.883108] rtc_rtd1295 9801b600.rtc: rtk_rtc already enabled 
+[    3.894687] cec_core_init, register cec_bus ffffffc00119b3d8
+[    3.900647] register cec driver 'cec' (ffffffc00119b558)
+[    3.906141] register cec device 'cec0' (ffffffc00119b650) to cec0
+[    3.912726] [cec_bus_match name = cec0,len=4,drv_name=cec]
+[    3.918384] probe : cec_dev 'cec0' (ffffffc00119b650), cec_drv 'cec' (ffffffc00119b558)
+[    3.927287] register cec device 'cec1' (ffffffc00119b900) to cec0
+[    3.933650] [cec_bus_match name = cec1,len=4,drv_name=cec]
+[    3.939325] probe : cec_dev 'cec1' (ffffffc00119b900), cec_drv 'cec' (ffffffc00119b558)
+[    4.038712] [SDIO] rtk_sdhci_set_clock end real_div=1f4, div=fa, c3c=0, PLL=ae4388, CLK=fa07
+[    4.058866] EMMC : emmc of_node found
+[    4.062663] [rtkemmc_probe] get driving s0 : 0x1
+[    4.067389] [rtkemmc_probe] get driving s0 : 0x77
+[    4.072214] [rtkemmc_probe] get driving s0 : 0x77
+[    4.077029] [rtkemmc_probe] get driving s0 : 0x77
+[    4.081851] [rtkemmc_probe] get driving s0 : 0x33
+[    4.086672] [rtkemmc_probe] get driving s2 : 0x1
+[    4.088708] [SDIO] rtk_sdhci_set_clock end real_div=29c, div=14e, c3c=0, PLL=ae4388, CLK=4e47
+[    4.100134] [rtkemmc_probe] get driving s2 : 0xbb
+[    4.104950] [rtkemmc_probe] get driving s2 : 0xbb
+[    4.109832] [rtkemmc_probe] get driving s2 : 0xbb
+[    4.114648] [rtkemmc_probe] get driving s2 : 0x33
+[    4.119471] [rtkemmc_probe] get tx tuning switch : 0
+[    4.124552] [rtkemmc_probe] get rx tuning switch : 0
+[    4.138712] [SDIO] rtk_sdhci_set_clock end real_div=3e8, div=1f4, c3c=0, PLL=ae4388, CLK=f447
+[    4.182447] -->rfkill_bluetooth_init
+[    4.186196] -->rfkill_bluetooth_probe
+[    4.188716] [SDIO] rtk_sdhci_set_clock end real_div=7d0, div=3e8, c3c=0, PLL=ae4388, CLK=e8c7
+[    4.198814] bluetooth_set_power: block=1
+[    4.202831] <--rfkill_bluetooth_probe
+[    4.210042] mmc0: Got command interrupt 0x00010000 even though no command operation was in progress.
+[    4.219493] audio-notifier audio-out-devices: failed to notify ACPU: -22
+[    4.220722] mmc0: Got command interrupt 0x00010000 even though no command operation was in progress.
+[    4.225677] mmc0: Got command interrupt 0x00010000 even though no command operation was in progress.
+[    4.227004] mmc0: Got command interrupt 0x00010000 even though no command operation was in progress.
+[    4.228332] mmc0: Got command interrupt 0x00010000 even though no command operation was in progress.
+[    4.229659] mmc0: Got command interrupt 0x00010000 even though no command operation was in progress.
+[    4.230985] mmc0: Got command interrupt 0x00010000 even though no command operation was in progress.
+[    4.232310] mmc0: Got command interrupt 0x00010000 even though no command operation was in progress.
+[    4.233637] mmc0: Got command interrupt 0x00010000 even though no command operation was in progress.
+[    4.234964] mmc0: Got command interrupt 0x00010000 even though no command operation was in progress.
+[    4.236291] mmc0: Got command interrupt 0x00010000 even though no command operation was in progress.
+[    4.237619] mmc0: Got command interrupt 0x00010000 even though no command operation was in progress.
+[    4.312469] card->mmc_avail_type = 0x00000013 
+[    4.389202] rtk-dwc3-type_c 98013200.rtk_dwc3_drd_type_c: create_debug_files
+[    4.684892] CL_DEV::ST 0 -> 0
+Thu Nov 23 09:31:13 UTC 2017 Starting OpenWRT init
+[    4.914271] hub 4-0:1.0: config failed, hub doesn't have any ports! (err -19)
+[    4.939918] rtk-ohci 98013400.ohci: _ohci_readl [USB Workaround] fixed force to enable ohci clock 
+[    5.113169] usb usb3-port1: port 1, status 0101, change 0000, 12 Mb/s
+[    5.139828] usb usb5-port1: port 1, status 0501, change 0000, 480 Mb/s
+[    5.238724] usb 3-1: new high-speed USB device number 2 using xhci-hcd (98029000.dwc3_u2host)
+[    5.258736] usb 5-1: new high-speed USB device number 2 using rtk-ehci (platform)
+[    5.338908] rtk-dwc3-type_c 98013200.rtk_dwc3_drd_type_c: Connection change OK: IN host mode to attach device at cc1 (cc_status=0x3b)
+Press the [f] key and hit [enter] to enter failsafe mode
+Press the [1], [2], [3] or [4] key and hit [enter] to select the debug level
+[    5.422166] usb 3-1: bInterfaceClass = 224 
+[    5.428128] usb 5-1: bInterfaceClass = 9 
+[    7.447825] block: unable to load configuration (fstab: Entry not found)
+[    7.454782] block: no usable configuration
+ext4 etc mounted!
+mount: /dev: filesystem mounted, but mount(8) failed: No such file or directory
+Thu Nov 23 09:31:16 UTC 2017 Waiting 27 x 0.1 seconds for OpenWRT coldplug
+Thu Nov 23 09:31:16 UTC 2017 Starting Android init
+[    8.544998] init: FIXME: selinux is forced to permissive mode!!
+[    8.609316] init: /init.kylin.rc: 507: invalid option 'disable'
+[    8.616561] init: SELinux: Could not get canonical path /adb_keys restorecon: No such file or directory.
+[    9.001016] init: Failed to read from /dev/hw_random: No such device
+[    9.007608] init: could not open /dev/keychord: No such file or directory
+[    9.035843] init: Failed to read from /dev/hw_random: No such device
+[    9.144971] init: property_set("ro.expect.recovery_id", "0x4ba9b8a1f510cea7c302bf827bf96ad3dedb3ee9000000000000000000000000") failed
+[    9.157245] init: property_set("ro.expect.recovery_id", "0x3da69065cf71d305bdd52205e46fbdfd3b03f9ef000000000000000000000000") failed
+[    9.169535] init: property_set("ro.expect.recovery_id", "0xf47c20bdfeb9283ace1ebbf0598b0f8b90727077000000000000000000000000") failed
+[    9.182142] init: /recovery not specified in fstab
+[    9.336576] bluetooth_set_power: block=1
+[    9.341711] init: property 'ro.serialno' doesn't exist while expanding '${ro.serialno}'
+[    9.350334] init: cannot expand '${ro.serialno}' while wri[tiAVnCPUg]  Steot  D'eb/sugys l/cevleal sfsla/ga  n0dx8ro1didff_u88sbc /a*fnldargo id 00/x0i1S2e6r9iba9l0 'uc
+ache  0xa1269b90 
+[AVCPU] Set Debug level *ptrDebugFlag  0x00000000 
+[    9.375221] init: cannot find '/system/bin/debuggerd64', disabling 'debuggerd64'
+[    9.382894] init: cannot find '/system/bin/rild', disabling 'ril-daemon'
+[    9.392972] init: cannot find '/system/bin/jpuinit', disabling 'jpuinit'
+[    9.429263] devfreq 98050000.gpu: Couldn't update frequency transition information.
+root@kylin32:/ # [   10.335439] healthd: No charger supplies found
+[   11.318823] Do not detect the SDIO card and close the clock
+[   11.324757] rtk_sdmmc_get_cd: SD card does not exist, regCARD_EXIST = 0
+[   19.925956] init: no such service 'regService'
+[   19.931925] init: no such service 'regService'
+[   20.731324] r8169 98016000.gmac eth0: rtl_csiar_cond == 0 (loop: 100, delay: 10).
+[   20.740460] r8169 98016000.gmac eth0: rtl_csiar_cond == 1 (loop: 100, delay: 10).
+[   20.968307] rtk-ohci 98013400.ohci: _ohci_readl [USB Workaround] fixed force to enable ohci clock 
+[   21.010210] rtk-ohci 98013400.ohci: _ohci_readl [USB Workaround] fixed force to enable ohci clock 
+[   22.503174] audit: rate limit exceeded
+[   24.548448] init: cannot find '/system/bin/preinstall.sh', disabling 'preinstall'
+[   28.053465] init: avc:  denied  { set } for property=rockchip.media.musiccount scontext=u:r:system_app:s0 tcontext=u:object_r:default_prop:s0 tclass=property_service
+[   29.630920] audit: rate limit exceeded
+
+1|root@kylin32:/ # uname -a
+Linux OpenWrt 4.1.17-g26a590a-dirty #10 SMP PREEMPT Sat Aug 19 15:05:06 CST 2017 armv8l
+root@kylin32:/ # 
