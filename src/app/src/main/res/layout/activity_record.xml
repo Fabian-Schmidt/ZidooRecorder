@@ -2,7 +2,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="#0099cc"
     tools:context="net.schmidtie.presentationrecording.RecordActivity">
 
     <!-- The primary full-screen view. This can be replaced with whatever view
@@ -19,7 +18,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:text="No HDMI IN Signal"
+            android:text="No HDMI signal"
+            android:textSize="36sp"
             android:visibility="visible" />
 
         <RelativeLayout
