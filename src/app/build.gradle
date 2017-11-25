@@ -21,11 +21,11 @@ android {
     }
 }
 
-//repositories{
-//    maven{
-//        url 'http://dl.bintray.com/alexanderr/maven'
-//    }
-//}
+repositories{
+    maven{
+        url 'http://dl.bintray.com/alexanderr/maven'
+    }
+}
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
@@ -36,4 +36,5 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile files('libs/realtek.jar')
     //compile 'net.sf.xfd:providers:0.1'
+    compile 'com.google.code.gson:gson:2.8.2'
 }

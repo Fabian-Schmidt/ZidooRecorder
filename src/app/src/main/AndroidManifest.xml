@@ -35,10 +35,11 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".StartMyActivityAtBootReceiver"
+        <receiver
+            android:name=".StartMyActivityAtBootReceiver"
             android:label="StartMyServieAtBootReceiver">
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
 
@@ -59,6 +60,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
+        <activity android:name=".SettingsActivity"></activity>
     </application>
 
 </manifest>

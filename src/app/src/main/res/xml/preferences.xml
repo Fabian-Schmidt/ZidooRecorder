@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <CheckBoxPreference
+        android:defaultValue="false"
+        android:key="autostart"
+        android:persistent="true"
+        android:summary="Start HDMI IN when application is started?"
+        android:title="Auto Start HDMI IN" />
+    <PreferenceCategory android:title="Recording">
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="record_local"
+            android:title="Record to local storage" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="record_allow_internal"
+            android:summary="Use device internal EMMC as storage? If not the largest attached (USB, SATA) device will be used."
+            android:title="Allow internal storage" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Streaming">
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="stream_udp"
+            android:summary="Activate UDP TS streaming."
+            android:title="Stream to remote" />
+        <EditTextPreference
+            android:defaultValue="239.0.0.1"
+            android:key="stream_udp_ip"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:summary="Streaming target UDP IP address. Example '239.0.0.1' -> VLC recieve with 'udp://@239.0.0.1:5000'"
+            android:title="UDP IP" />
+        <EditTextPreference
+            android:defaultValue="5000"
+            android:key="stream_udp_port"
+            android:numeric="integer"
+            android:inputType="number"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:summary="Streaming target UDP port."
+            android:title="UDP port" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="Quality">
+
+        <ListPreference
+            android:defaultValue="15000000"
+            android:entries="@array/QualityBitrateText"
+            android:entryValues="@array/QualityBitrateValues"
+            android:key="quality_video_bitrate"
+            android:title="Video Bitrate" />
+        <ListPreference
+            android:defaultValue="48000"
+            android:entries="@array/QualitySamplesText"
+            android:entryValues="@array/QualitySamplesValues"
+            android:key="quality_audio_samples"
+            android:title="Audio Samples" />
+    </PreferenceCategory>
+</PreferenceScreen>

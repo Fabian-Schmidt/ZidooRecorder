@@ -54,9 +54,6 @@ class RecorderClass {
     private final static int MESSAGE_START_RECORD_DELAY = 50;
     private final static int MESSAGE_RETRY_TIME = 200;
 
-    private final static long MAX_FILE_SIZE = 1536L * 1024L * 1024L;
-
-
     private IHdmiStateChange StateChange;
 
     RecorderClass(Context mContext) {
@@ -64,6 +61,16 @@ class RecorderClass {
         this.HdmiViewType = HdmiDisplayType.TEXTUREVIEW;
         this.DesireState.HdmiVideo = true;
 
+        Settings settings = SettingsActivity.ReadSettings(mContext);
+        this.DesireState.HdmiVideoRecording = settings.RecordLocal;
+        this.DesireState.HdmiRecordToDeviceAllowed = settings.RecordAllowInternal;
+
+        this.DesireState.HdmiVideoStream = settings.StreamUDP;
+        this.DesireState.UDP_Target_IP = settings.StreamUDP_IP;
+        this.DesireState.UDP_Target_Port = settings.StreamUDP_Port;
+
+        this.DesireState.VideoBitrate = settings.QualityVideoBitrate;
+        this.DesireState.AudioSamples = settings.QualityAudioSamples;
         init();
     }
 
@@ -132,7 +139,7 @@ class RecorderClass {
                         MessageHandler.removeMessages(MESSAGE_TIMER);
                         if (HdmiIsConnect
                                 && CurrentState.HdmiVideo
-                                && DesireState.HdmiVideoRecording) {
+                                && (DesireState.HdmiVideoRecording || DesireState.HdmiVideoStream)) {
                             startRecord();
                             if (StateChange != null) {
                                 StateChange.StartRecording();
@@ -147,7 +154,7 @@ class RecorderClass {
                     case MESSAGE_TIMER: {
                         if (HdmiIsConnect
                                 && CurrentState.HdmiVideo
-                                && CurrentState.HdmiVideoRecording) {
+                                && (CurrentState.HdmiVideoRecording || CurrentState.HdmiVideoStream)) {
                             CurrentState.HdmiRecordTime = CurrentState.HdmiRecordTime + 1;
                             //MessageHandler.sendEmptyMessageDelayed(MESSAGE_TIMER, MESSAGE_TIMER_TIME);
                         }
@@ -193,16 +200,9 @@ class RecorderClass {
     private SurfaceView SurfaceView = null;
     private SurfaceHolder SurfaceViewHolder = null;
     private FloatingWindowSurfaceCallback SurfaceViewCallback = null;
-    //private WindowManager mWindowManager = null;
-    //private FloatingWindowView mFloatingView = null;
 
     private void initView() {
         if (this.RootView != null) {
-            //this.mWindowManager = (WindowManager) this.mContext.getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
-            //LayoutInflater li = (LayoutInflater) this.mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            //this.mFloatingView = (FloatingWindowView) li.inflate(R.layout.floating_window, null);
-            //RelativeLayout viewGroup = (RelativeLayout) this.mFloatingView.findViewById(R.id.floating_surfaceview);
-
             // setup view type
             if (HdmiViewType == HdmiDisplayType.SURFACEVIEW) {
                 SurfaceView = new SurfaceView(mContext);
@@ -236,8 +236,6 @@ class RecorderClass {
 
                 HDMIRxManager.stop();
                 HDMIRxManager.release();
-
-                //mFloatingView.setHdmiDisPlay(false);
             } catch (Exception ex) {
                 Log.e(TAG, "Error during stopPreview", ex);
             }
@@ -302,7 +300,6 @@ class RecorderClass {
                         HDMIRxManager.setPreviewDisplay(SurfaceViewHolder);
                     } else if (HdmiViewType == HdmiDisplayType.TEXTUREVIEW) {
                         SurfaceTexture surfaceTexture = TextureView.getSurfaceTexture();
-                        // TextureView.setRotation(180);
                         HDMIRxManager.setPreviewDisplay3(surfaceTexture);
                     }
                     // configureTargetFormat
@@ -324,7 +321,6 @@ class RecorderClass {
                     CurrentState.Width = DesireState.Width;
                     CurrentState.Height = DesireState.Height;
                     CurrentState.Fps = fps;
-                    //HDMIRxManager.configureTargetFormat(new RtkHDMIRxManager.VideoConfig(1920, 1080, 10000000), new RtkHDMIRxManager.AudioConfig(2, 48000, 32000));
                     // configureTargetFormat end
                     HDMIRxManager.play();
                     CurrentState.HdmiVideo = true;
@@ -463,45 +459,48 @@ class RecorderClass {
                 int height = 1080;
                 //RecordInfo currentRecordInfo = getCurrentRecordInfo();
                 //ResolutionInfo resolution = getResolution(currentRecordInfo.mResolution == 0 ? 1 : currentRecordInfo.mResolution);
-                int intValue = 2;
-                int intValue2 = 48000;
+                int audioChannels = 2;
+                int audioSamples = DesireState.AudioSamples;
                 int i = 441;
-                if (intValue2 % 8000 == 0) {
+                if (audioSamples % 8000 == 0) {
                     i = 480;
                 }
-                i = ((intValue * 640) * intValue2) / i;
-                Log.d(TAG, "isContinueRecorder = " + "   w = " + width + "  h = " + height);
-                int bitRate = 15000000;
-                RtkHDMIRxManager.VideoConfig videoConfig = new RtkHDMIRxManager.VideoConfig(width, height, bitRate);
-                Log.d(TAG, "AudioConfig channelCount = " + intValue + "   sampleRate = " + intValue2 + "  audioBitrate = " + i);
+                i = (audioChannels * 640 * audioSamples) / i;
+                Log.d(TAG, "VideoConfig w = " + width + "  h = " + height + " rate = " + this.DesireState.VideoBitrate);
+                RtkHDMIRxManager.VideoConfig videoConfig = new RtkHDMIRxManager.VideoConfig(width, height, this.DesireState.VideoBitrate);
+                Log.d(TAG, "AudioConfig channelCount = " + audioChannels + "   sampleRate = " + audioSamples + "  audioBitrate = " + i);
 
-                RtkHDMIRxManager.AudioConfig audioConfig = new RtkHDMIRxManager.AudioConfig(intValue, intValue2, i);
+                RtkHDMIRxManager.AudioConfig audioConfig = new RtkHDMIRxManager.AudioConfig(audioChannels, audioSamples, i);
                 HDMIRxManager.configureTargetFormat(videoConfig, audioConfig);
 
                 HDMIRxManager.setTargetFd(prepareIO, DesireState.HdmiFileFormat);
                 HDMIRxManager.setTranscode(true);
 
+                CurrentState.VideoBitrate = this.DesireState.VideoBitrate;
                 CurrentState.HdmiRecordToDeviceAllowed = DesireState.HdmiRecordToDeviceAllowed;
                 CurrentState.HdmiRecordPath = DesireState.HdmiRecordPath;
                 CurrentState.HdmiFileFormat = DesireState.HdmiFileFormat;
-                CurrentState.HdmiVideoRecording = true;
+                CurrentState.HdmiVideoRecording = DesireState.HdmiVideoRecording;
+                CurrentState.HdmiVideoStream = DesireState.HdmiVideoStream;
 
                 return true;
             } catch (Exception ex) {
                 Log.e(TAG, "Error during start recording", ex);
                 CurrentState.HdmiVideoRecording = false;
+                CurrentState.HdmiVideoStream = false;
             }
         }
         return false;
     }
 
     public boolean IsHdmiVideoRecording() {
-        return CurrentState.HdmiVideoRecording;
+        return CurrentState.HdmiVideoRecording || CurrentState.HdmiVideoStream;
     }
 
     public boolean stopRecord() {
         Log.d(TAG, "stopRecord");
         CurrentState.HdmiVideoRecording = false;
+        CurrentState.HdmiVideoStream = false;
         try {
             if (HDMIRxManager != null) {
                 HDMIRxManager.setTranscode(false);
@@ -562,14 +561,12 @@ class RecorderClass {
 
     boolean startDisplay() {
         DesireState.HdmiVideo = true;
-        DesireState.HdmiVideoRecording = true;
         startPreview();
         return false;
     }
 
     boolean stopDisplay() {
         DesireState.HdmiVideo = false;
-        DesireState.HdmiVideoRecording = false;
         stopPreview();
         return false;
     }

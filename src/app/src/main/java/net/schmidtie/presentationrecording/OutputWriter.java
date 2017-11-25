@@ -84,27 +84,25 @@ public class OutputWriter {
             }
             mReadPipe = createPipe[0];
             mUDP_WritePipe = createPipe[1];
-            Log.i(TAG, "mIp = " + desireState.UDP_Target_IP + "  mPort = " + desireState.UDP_Target_Port + "  Multicast = " + desireState.UDP_Multicast);
+            Log.i(TAG, "mIp = " + desireState.UDP_Target_IP + "  mPort = " + desireState.UDP_Target_Port + "  Multicast = " + mAddress.isMulticastAddress());
             mAddress = InetAddress.getByName(desireState.UDP_Target_IP);
             mPort = desireState.UDP_Target_Port;
             try {
-                if (desireState.UDP_Multicast == false) {
-                    udpSocket = new DatagramSocket(null);
-                    udpSocket.setReuseAddress(true);
-                    udpSocket.bind(null);
-                    //udpSocket.bind(new InetSocketAddress(desireState.UDP_Target_Port));
-                } else if (mAddress.isMulticastAddress()) {
-                    udpSocket = new MulticastSocket(desireState.UDP_Target_Port);
-                    udpSocket.setBroadcast(true);
-                    udpSocket.setReuseAddress(true);
-                } else {
-                    this.mHandler.removeMessages(0);
-                    this.mHandler.sendMessageDelayed(this.mHandler.obtainMessage(0, Integer.valueOf(1)), ERRORTIME);
-                    return null;
+                if (desireState.HdmiVideoStream){
+                    if (mAddress.isMulticastAddress() == false) {
+                        udpSocket = new DatagramSocket(null);
+                        udpSocket.setReuseAddress(true);
+                        udpSocket.bind(null);
+                    } else {
+                        udpSocket = new MulticastSocket(desireState.UDP_Target_Port);
+                        udpSocket.setBroadcast(true);
+                        udpSocket.setReuseAddress(true);
+                    }
                 }
-
-                mLocalFileSize = 0;
-                mLocalWritePipe = GenerateNewLocalWritePipe();
+                if (desireState.HdmiVideoRecording) {
+                    mLocalFileSize = 0;
+                    mLocalWritePipe = GenerateNewLocalWritePipe();
+                }
             } catch (Exception e) {
                 e.printStackTrace();
                 Log.v(TAG, "e1", e);
@@ -162,8 +160,10 @@ public class OutputWriter {
                             counterTillNextCheckOfFreeDiskSpace = counterTillNextCheckOfFreeDiskSpace + 1;
                             int read = autoCloseInputStream.read(bArr);
                             if (read > 0) {
-                                DatagramPacket datagramPacket = new DatagramPacket(bArr, 0, read, mAddress, mPort);
-                                udpSocket.send(datagramPacket);
+                                if (udpSocket != null) {
+                                    DatagramPacket datagramPacket = new DatagramPacket(bArr, 0, read, mAddress, mPort);
+                                    udpSocket.send(datagramPacket);
+                                }
                                 obj = 1;
                                 if (autoCloseLocalOutputStream != null) {
                                     autoCloseLocalOutputStream.write(bArr, 0, read);
@@ -174,7 +174,8 @@ public class OutputWriter {
                             //All data sent for this frame.
                             if (counterTillNextCheckOfFreeDiskSpace > 30 * 30) {//every 30 seconds (@30FPS)
                                 counterTillNextCheckOfFreeDiskSpace = 0;
-                                if (mDesireState.HdmiRecordPath != null
+                                if (autoCloseLocalOutputStream != null
+                                        && mDesireState.HdmiRecordPath != null
                                         && mDesireState.HdmiRecordPath.getFreeSpace() < LOCAL_COPY_MIN_FREE_DISK) {
                                     //Stop recording
                                     Log.i(TAG, "Stop recording local disk is full.");
@@ -188,7 +189,8 @@ public class OutputWriter {
                                     autoCloseLocalOutputStream = null;
                                     mDesireState.HdmiRecordPath = null;
                                 }
-                            } else if (mLocalFileSize > LOCAL_COPY_MAX_FILE_SIZE) {
+                            } else if (autoCloseLocalOutputStream != null
+                                    && mLocalFileSize > LOCAL_COPY_MAX_FILE_SIZE) {
                                 //Max file size reached. Start new file.
                                 try {
                                     autoCloseLocalOutputStream.flush();

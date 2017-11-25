@@ -21,9 +21,10 @@ public class DisplayState {
     public int Fps = 0;
     public int Width = 0;
     public int Height = 0;
+    public int VideoBitrate = 0;
+    public int AudioSamples = 0;
 
-    public String UDP_Target_IP="239.0.0.1";
-    public int UDP_Target_Port=5000;
-    public boolean UDP_Multicast=true;
-
+    public boolean HdmiVideoStream = true;
+    public String UDP_Target_IP = "239.0.0.1";
+    public int UDP_Target_Port = 5000;
 }
