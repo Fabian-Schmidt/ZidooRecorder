@@ -9,6 +9,7 @@ The Zidoo X8 and x9s are cheap devices (100 USD / 150 USD) and can capture 4k an
 ## Getting Started
 
 This will describe how to setup a Zidoo X8 or X9s for remote debugging and install the software.
+The APK is in the subfolder ```release```.
 
 ### Install steps
  1. RTD1295 based Android box. Tested with Zidoo X8 and Zidoo X9s.
