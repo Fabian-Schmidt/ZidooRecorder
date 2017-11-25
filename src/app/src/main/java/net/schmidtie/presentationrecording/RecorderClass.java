@@ -64,16 +64,17 @@ class RecorderClass {
         Settings settings = SettingsActivity.ReadSettings(mContext);
         Log.d(TAG, settings.toString());
 
-        this.DesireState.HdmiVideoRecording = settings.RecordLocal;
-        this.DesireState.HdmiRecordToDeviceAllowed = settings.RecordAllowInternal;
+        DesireState.HdmiVideoRecording = settings.RecordLocal;
+        DesireState.HdmiRecordToDeviceAllowed = settings.RecordAllowInternal;
 
-        this.DesireState.HdmiVideoStream = settings.StreamUDP;
-        this.DesireState.UDP_Target_IP = settings.StreamUDP_IP;
-        this.DesireState.UDP_Target_Port = settings.StreamUDP_Port;
+        DesireState.HdmiVideoStream = settings.StreamUDP;
+        DesireState.UDP_Target_IP = settings.StreamUDP_IP;
+        DesireState.UDP_Target_Port = settings.StreamUDP_Port;
 
-        this.DesireState.VideoBitrate = settings.QualityVideoBitrate;
-        this.DesireState.VideoReduceFramerate = settings.QualityVideoReduceFramerate;
-        this.DesireState.AudioSamples = settings.QualityAudioSamples;
+        DesireState.VideoBitrate = settings.QualityVideoBitrate;
+        DesireState.VideoReduceFramerate = settings.QualityVideoReduceFramerate;
+        DesireState.VideoLimitResolution = settings.QualityVideoLimitResolution;
+        DesireState.AudioSamples = settings.QualityAudioSamples;
         init();
     }
 
@@ -292,7 +293,13 @@ class RecorderClass {
                     return false;
                 }
                 HDMIRxParameters hdmirxGetParam = HDMIRxManager.getParameters();
-                Tuple<Integer, Integer> previewSize = getSupportedPreviewSize(hdmirxGetParam, rxStatus.width, rxStatus.height);
+                DesireState.Width = rxStatus.width;
+                DesireState.Height = rxStatus.height;
+                if (CurrentState.VideoLimitResolution && (DesireState.Width > 1920 || DesireState.Height > 1080)) {
+                    DesireState.Width = 1920;
+                    DesireState.Height = 1080;
+                }
+                Tuple<Integer, Integer> previewSize = getSupportedPreviewSize(hdmirxGetParam, DesireState.Width, DesireState.Height);
                 DesireState.Width = previewSize.x;
                 DesireState.Height = previewSize.y;
                 DesireState.Fps = getSupportedPreviewFrameRate(hdmirxGetParam);
@@ -328,6 +335,7 @@ class RecorderClass {
                     CurrentState.Height = DesireState.Height;
                     CurrentState.Fps = fps;
                     CurrentState.VideoReduceFramerate = DesireState.VideoReduceFramerate;
+                    CurrentState.VideoLimitResolution = DesireState.VideoLimitResolution;
                     // configureTargetFormat end
                     HDMIRxManager.play();
                     CurrentState.HdmiVideo = true;
@@ -362,8 +370,14 @@ class RecorderClass {
         int retWidth = 0, retHeight = 0;
         if (previewSizes == null || previewSizes.size() <= 0)
             return null;
+
         for (int i = 0; i < previewSizes.size(); i++) {
-            if (previewSizes.get(i) != null && rxWidth == previewSizes.get(i).width) {
+            com.realtek.hardware.RtkHDMIRxManager.Size size = previewSizes.get(i);
+            Log.i(TAG, "SupportedPreviewSize(" + i + ") width = " + size.width + " height = " + size.height);
+        }
+
+        for (int i = 0; i < previewSizes.size(); i++) {
+            if (rxWidth == previewSizes.get(i).width) {
                 retWidth = previewSizes.get(i).width;
                 retHeight = previewSizes.get(i).height;
                 if (rxHeight == previewSizes.get(i).height)
@@ -461,9 +475,8 @@ class RecorderClass {
                     Log.d(TAG, "mOutputWriter.prepareIO() == null");
                     return false;
                 }
-
-                int width = 1920;
-                int height = 1080;
+                int width = CurrentState.Width;
+                int height = CurrentState.Height;
                 //RecordInfo currentRecordInfo = getCurrentRecordInfo();
                 //ResolutionInfo resolution = getResolution(currentRecordInfo.mResolution == 0 ? 1 : currentRecordInfo.mResolution);
                 int audioChannels = 2;

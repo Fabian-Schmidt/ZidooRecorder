@@ -14,6 +14,7 @@ public class Settings {
 
     public int QualityVideoBitrate = 15000000;
     public boolean QualityVideoReduceFramerate = true;
+    public boolean QualityVideoLimitResolution = true;
     public int QualityAudioSamples = 44100;
 
     @Override

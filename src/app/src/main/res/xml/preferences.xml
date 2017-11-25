@@ -57,6 +57,11 @@
             android:key="quality_video_reduce_framerate"
             android:summary="60FPS -> 30FPS and 50FPS -> 25 FPS. WARNING! Video decoder will drop frames on higher bitrate."
             android:title="Video reduce framerate" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="quality_video_limit_resolution"
+            android:summary="Limit preview and record resolution to 1920x1080. WARNING! Video decoder produces artefacts on high resolutions."
+            android:title="Video limit resolution" />
         <ListPreference
             android:defaultValue="48000"
             android:entries="@array/QualitySamplesText"
