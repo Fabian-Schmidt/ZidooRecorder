@@ -13,6 +13,7 @@ public class Settings {
     public int StreamUDP_Port = 5000;
 
     public int QualityVideoBitrate = 15000000;
+    public boolean QualityVideoReduceFramerate = true;
     public int QualityAudioSamples = 44100;
 
     @Override

@@ -16,6 +16,7 @@ public class SettingsActivity extends Activity {
     private static final String KEY_UDP_IP = "stream_udp_ip";
     private static final String KEY_UDP_PORT = "stream_udp_port";
     private static final String KEY_QUALITY_VIDEO_BITRATE = "quality_video_bitrate";
+    private static final String KEY_QUALITY_VIDEO_REDUCE_FRAMERATE = "quality_video_reduce_framerate";
     private static final String KEY_QUALITY_AUDIO_BITRATE = "quality_audio_samples";
 
     @Override
@@ -52,6 +53,7 @@ public class SettingsActivity extends Activity {
         } catch (NumberFormatException ex) {
             ret.QualityVideoBitrate = 15000000;
         }
+        ret.QualityVideoReduceFramerate = sharedPref.getBoolean(SettingsActivity.KEY_QUALITY_VIDEO_REDUCE_FRAMERATE, true);
         String QualityAudioSamples = sharedPref.getString(SettingsActivity.KEY_QUALITY_AUDIO_BITRATE, "48000");
         try {
             ret.QualityAudioSamples = Integer.parseInt(QualityAudioSamples);

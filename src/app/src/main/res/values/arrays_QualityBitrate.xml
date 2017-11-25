@@ -1,18 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="QualityBitrateText">
+        <item>1MBit</item>
+        <item>2MBit</item>
+        <item>3MBit</item>
+        <item>4MBit</item>
         <item>5MBit</item>
         <item>10MBit</item>
         <item>15MBit</item>
+        <item>20MBit</item>
         <item>25MBit</item>
+        <item>30MBit</item>
         <item>35MBit</item>
+        <item>40MBit</item>
+        <item>45MBit</item>
+        <item>50MBit</item>
     </string-array>
     <string-array name="QualityBitrateValues">
+        <item>1000000</item>
+        <item>2000000</item>
+        <item>3000000</item>
+        <item>4000000</item>
         <item>5000000</item>
         <item>10000000</item>
         <item>15000000</item>
+        <item>20000000</item>
         <item>25000000</item>
+        <item>30000000</item>
         <item>35000000</item>
+        <item>40000000</item>
+        <item>45000000</item>
+        <item>50000000</item>
     </string-array>
     <string-array name="QualitySamplesText">
         <item>44.1kHz</item>

@@ -62,6 +62,8 @@ class RecorderClass {
         this.DesireState.HdmiVideo = true;
 
         Settings settings = SettingsActivity.ReadSettings(mContext);
+        Log.d(TAG, settings.toString());
+
         this.DesireState.HdmiVideoRecording = settings.RecordLocal;
         this.DesireState.HdmiRecordToDeviceAllowed = settings.RecordAllowInternal;
 
@@ -70,6 +72,7 @@ class RecorderClass {
         this.DesireState.UDP_Target_Port = settings.StreamUDP_Port;
 
         this.DesireState.VideoBitrate = settings.QualityVideoBitrate;
+        this.DesireState.VideoReduceFramerate = settings.QualityVideoReduceFramerate;
         this.DesireState.AudioSamples = settings.QualityAudioSamples;
         init();
     }
@@ -180,6 +183,7 @@ class RecorderClass {
             @Override
             public void onReceive(Context context, Intent intent) {
                 HdmiIsConnect = intent.getBooleanExtra(HDMIRxStatus.EXTRA_HDMIRX_PLUGGED_STATE, false);
+                Log.d(TAG, "Intent HDMIRX_PLUGGED HDMIRX_PLUGGED_STATE = " + HdmiIsConnect);
                 MessageHandler.sendEmptyMessage(MESSAGE_HDMI_CHANGED);
             }
         };
@@ -308,11 +312,13 @@ class RecorderClass {
                     //Check output resolution? For better 4K downscaling?
                     hdmirxParam.setPreviewSize(DesireState.Width, DesireState.Height);
                     int fps = DesireState.Fps;
-                    if (fps == 60) {
-                        fps = 30;
-                    }
-                    if (fps == 50) {
-                        fps = 25;
+                    if (this.DesireState.VideoReduceFramerate) {
+                        if (fps == 60) {
+                            fps = 30;
+                        }
+                        if (fps == 50) {
+                            fps = 25;
+                        }
                     }
                     Log.d(TAG, "setPreviewFrameRate Fps = " + fps);
                     hdmirxParam.setPreviewFrameRate(fps);
@@ -321,6 +327,7 @@ class RecorderClass {
                     CurrentState.Width = DesireState.Width;
                     CurrentState.Height = DesireState.Height;
                     CurrentState.Fps = fps;
+                    CurrentState.VideoReduceFramerate = DesireState.VideoReduceFramerate;
                     // configureTargetFormat end
                     HDMIRxManager.play();
                     CurrentState.HdmiVideo = true;

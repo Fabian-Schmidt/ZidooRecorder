@@ -50,12 +50,18 @@
             android:entries="@array/QualityBitrateText"
             android:entryValues="@array/QualityBitrateValues"
             android:key="quality_video_bitrate"
-            android:title="Video Bitrate" />
+            android:summary="Maximum video bitrate for recording and stream."
+            android:title="Video bitrate" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="quality_video_reduce_framerate"
+            android:summary="60FPS -> 30FPS and 50FPS -> 25 FPS. WARNING! Video decoder will drop frames on higher bitrate."
+            android:title="Video reduce framerate" />
         <ListPreference
             android:defaultValue="48000"
             android:entries="@array/QualitySamplesText"
             android:entryValues="@array/QualitySamplesValues"
             android:key="quality_audio_samples"
-            android:title="Audio Samples" />
+            android:title="Audio samples" />
     </PreferenceCategory>
 </PreferenceScreen>

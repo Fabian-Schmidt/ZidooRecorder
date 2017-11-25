@@ -84,8 +84,8 @@ public class OutputWriter {
             }
             mReadPipe = createPipe[0];
             mUDP_WritePipe = createPipe[1];
-            Log.i(TAG, "mIp = " + desireState.UDP_Target_IP + "  mPort = " + desireState.UDP_Target_Port + "  Multicast = " + mAddress.isMulticastAddress());
             mAddress = InetAddress.getByName(desireState.UDP_Target_IP);
+            Log.i(TAG, "mIp = " + desireState.UDP_Target_IP + "  mPort = " + desireState.UDP_Target_Port + "  Multicast = " + mAddress.isMulticastAddress());
             mPort = desireState.UDP_Target_Port;
             try {
                 if (desireState.HdmiVideoStream){
@@ -203,8 +203,8 @@ public class OutputWriter {
                                     autoCloseLocalOutputStream = new ParcelFileDescriptor.AutoCloseOutputStream(mLocalWritePipe);
                                 }
                             } else {
-                                //Wait for 1/6th of a frame(@30FPS) for new data.
-                                Thread.sleep(5);
+                                //Wait for 1ms for new data.
+                                Thread.sleep(1);
                             }
                         }
                     } catch (Exception e2) {

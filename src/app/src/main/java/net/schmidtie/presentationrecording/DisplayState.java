@@ -22,6 +22,7 @@ public class DisplayState {
     public int Width = 0;
     public int Height = 0;
     public int VideoBitrate = 0;
+    public boolean VideoReduceFramerate = true;
     public int AudioSamples = 0;
 
     public boolean HdmiVideoStream = true;
