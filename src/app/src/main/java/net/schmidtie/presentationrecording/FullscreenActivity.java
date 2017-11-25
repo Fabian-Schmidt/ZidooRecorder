@@ -25,10 +25,10 @@ public class FullscreenActivity extends Activity {
         Settings settings =  SettingsActivity.ReadSettings(this);
         Log.d(TAG, settings.toString());
 
+        setContentView(R.layout.activity_fullscreen);
+
         if (settings.Autostart){
             startActivity(new Intent(this, RecordActivity.class));
-        } else {
-            setContentView(R.layout.activity_fullscreen);
         }
     }
 
