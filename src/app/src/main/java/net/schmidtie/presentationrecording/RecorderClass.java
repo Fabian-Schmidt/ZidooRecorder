@@ -149,22 +149,6 @@ class RecorderClass {
                                 && CurrentState.HdmiVideo
                                 && CurrentState.HdmiVideoRecording) {
                             CurrentState.HdmiRecordTime = CurrentState.HdmiRecordTime + 1;
-
-                            /*try {
-                                String str = CurrentState.HdmiRecordPath + File.separator + CurrentState.HdmiRecordFile;
-                                File file = new File(str);
-                                long fileSize = file.length();
-                                if (fileSize > MAX_FILE_SIZE) {
-                                    if (StateChange != null) {
-                                        StateChange.StopRecording();
-                                    }
-                                    stopRecord();
-                                    MessageHandler.sendEmptyMessageDelayed(MESSAGE_START_RECORD, MESSAGE_START_RECORD_DELAY);
-                                }
-                            } catch (Exception ex) {
-                                Log.e(TAG, "Failed restarting recording.", ex);
-                            }*/
-
                             //MessageHandler.sendEmptyMessageDelayed(MESSAGE_TIMER, MESSAGE_TIMER_TIME);
                         }
                     }
@@ -237,36 +221,6 @@ class RecorderClass {
             PreviewView.setLayoutParams(param);
             this.RootView.addView(PreviewView);
         }
-        /*WindowManager.LayoutParams params = new WindowManager.LayoutParams(
-                WindowManager.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
-                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
-                PixelFormat.TRANSLUCENT);
-*/
-       /* WindowManager.LayoutParams params = new WindowManager.LayoutParams(
-                WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
-                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
-                PixelFormat.TRANSLUCENT);
-        params.flags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
-                | WindowManager.LayoutParams.FLAG_DIM_BEHIND
-                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                | WindowManager.LayoutParams.FLAG_FULLSCREEN;*/
-       /* WindowManager.LayoutParams params = new WindowManager.LayoutParams(720, 480, 2005, 2568, -3);
-        params.x = 0;
-        params.y = 0;
-        //params.gravity = 51;
-        //this.mFloatingView.setBackgroundColor(0xff000000);
-        this.mFloatingView.setBackgroundColor(0xff0ff000);
-        try {
-            this.mFloatingView.setSystemUiVisibility(5894);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        this.mWindowManager.addView(this.mFloatingView, params);*/
     }
 
     private boolean stopPreview() {
@@ -354,6 +308,7 @@ class RecorderClass {
                     // configureTargetFormat
                     HDMIRxParameters hdmirxParam = new HDMIRxParameters();
                     Log.d(TAG, "setPreviewSize Width = " + DesireState.Width + " Height = " + DesireState.Height);
+                    //Check output resolution? For better 4K downscaling?
                     hdmirxParam.setPreviewSize(DesireState.Width, DesireState.Height);
                     int fps = DesireState.Fps;
                     if (fps == 60) {
@@ -523,23 +478,6 @@ class RecorderClass {
                 RtkHDMIRxManager.AudioConfig audioConfig = new RtkHDMIRxManager.AudioConfig(intValue, intValue2, i);
                 HDMIRxManager.configureTargetFormat(videoConfig, audioConfig);
 
-                /*String recordFolder = FileUtil.GetStorageFolder();
-                if (recordFolder == null)
-                    recordFolder = "/storage/emulated/0";
-                recordFolder = recordFolder + File.separator + "hdmi";
-                CurrentState.HdmiRecordPath = recordFolder;
-                Random r = new Random();
-                int rndNumber = r.nextInt(999999);
-                String recordFileName = "VID_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + "_" + rndNumber + (FileFormat == RtkHDMIRxManager.HDMIRX_FILE_FORMAT_TS ? ".ts" : ".mp4");
-                CurrentState.HdmiRecordFile = recordFileName;
-                String str = recordFolder + File.separator + recordFileName;
-                Log.d(TAG, "record path = " + str);
-                //FileUtil.CreateFileWithFullAcess(recordFolder, recordFileName);
-                File file = new File(str);
-                file.createNewFile();
-                FileUtil.ChangeFileToFullAcess(str);
-*/
-                //HDMIRxManager.setTargetFd(ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_APPEND | ParcelFileDescriptor.MODE_WRITE_ONLY), FileFormat);//939524096
                 HDMIRxManager.setTargetFd(prepareIO, DesireState.HdmiFileFormat);
                 HDMIRxManager.setTranscode(true);
 

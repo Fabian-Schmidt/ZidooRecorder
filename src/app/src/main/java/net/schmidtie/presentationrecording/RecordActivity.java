@@ -10,10 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-/**
- * An example full-screen activity that shows and hides the system UI (i.e.
- * status bar and navigation/system bar) with user interaction.
- */
 public class RecordActivity extends Activity {
     private static final String TAG = "RecordActivity";
 
@@ -30,7 +26,6 @@ public class RecordActivity extends Activity {
     private RecorderServiceBindTool mRecorderServiceBindTool = null;
     private RecorderClass mRecorderClass;
     private IHdmiStateChange StateChange = new IHdmiStateChange() {
-
         private final int TOAST_DURATION = Toast.LENGTH_SHORT;
 
         @Override
@@ -61,9 +56,6 @@ public class RecordActivity extends Activity {
     };
 
     private void initService() {
-        //ViewGroup hdmiGroud = (ViewGroup) findViewById(R.id.home_ac_hdmi);
-        //View HdmiNoSignaleView = findViewById(R.id.home_ac_video_hdmi_nosignale);
-
         mRecorderServiceBindTool = RecorderServiceBindTool.getInstance(this);
         mRecorderServiceBindTool.initService(new RecorderServiceBindTool.RecorderServiceListener() {
 
@@ -76,10 +68,6 @@ public class RecordActivity extends Activity {
                 RecordActivity.this.mRecorderClass.startDisplay();
             }
         });
-        //mRealtekeHdmi = new RecorderClass(this, rootView, HdmiDisplayType.SURFACEVIEW, StateChange);
-        //mRealtekeHdmi.startDisplay();
-
-        //mRealtekeHdmi.record();
     }
 
     @Override
