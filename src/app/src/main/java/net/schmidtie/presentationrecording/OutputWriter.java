@@ -142,7 +142,7 @@ public class OutputWriter {
     private String GenerateLocalFileName() {
         Random r = new Random();
         int rndNumber = r.nextInt(999999);
-        String recordFileName = "VID_" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + "_" + rndNumber + (mDesireState.HdmiFileFormat == RtkHDMIRxManager.HDMIRX_FILE_FORMAT_TS ? ".ts" : ".mp4");
+        String recordFileName = "record_" + new SimpleDateFormat("yyyy-MM-ddTHH-mm-ss").format(new Date()) + "_" + rndNumber + (mDesireState.HdmiFileFormat == RtkHDMIRxManager.HDMIRX_FILE_FORMAT_TS ? ".ts" : ".mp4");
         return recordFileName;
     }
 
