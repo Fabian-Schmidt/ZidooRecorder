@@ -3,7 +3,8 @@ package net.schmidtie.presentationrecording;
 import com.google.gson.Gson;
 
 public class Settings {
-    public boolean Autostart = false;
+    public boolean Autostart_App = false;
+    public boolean Autostart_HdmiIn = false;
 
     public boolean RecordLocal = true;
     public boolean RecordAllowInternal = false;

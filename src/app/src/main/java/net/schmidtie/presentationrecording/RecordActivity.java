@@ -30,12 +30,12 @@ public class RecordActivity extends Activity {
 
         @Override
         public void StartRecording() {
-            Toast.makeText(RecordActivity.this, "Start Recording", TOAST_DURATION).show();
+            //Toast.makeText(RecordActivity.this, "Start Recording", TOAST_DURATION).show();
         }
 
         @Override
         public void StopRecording() {
-            Toast.makeText(RecordActivity.this, "Stop Recording", TOAST_DURATION).show();
+            //Toast.makeText(RecordActivity.this, "Stop Recording", TOAST_DURATION).show();
         }
 
         @Override

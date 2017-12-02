@@ -9,7 +9,8 @@ import android.preference.PreferenceManager;
 public class SettingsActivity extends Activity {
     private static final String TAG = "SettingsActivity";
 
-    private static final String KEY_AUTOSTART = "autostart";
+    private static final String KEY_AUTOSTART_APP = "autostart_app";
+    private static final String KEY_AUTOSTART_HDIMIN = "autostart_hdmiin";
     private static final String KEY_RECORD_LOCAL = "record_local";
     private static final String KEY_RECORD_ALLOW_INTERNAL = "record_allow_internal";
     private static final String KEY_UDP = "stream_udp";
@@ -34,7 +35,8 @@ public class SettingsActivity extends Activity {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
         Settings ret = new Settings();
 
-        ret.Autostart = sharedPref.getBoolean(SettingsActivity.KEY_AUTOSTART, false);
+        ret.Autostart_App = sharedPref.getBoolean(SettingsActivity.KEY_AUTOSTART_APP, false);
+        ret.Autostart_HdmiIn = sharedPref.getBoolean(SettingsActivity.KEY_AUTOSTART_HDIMIN, false);
 
         ret.RecordLocal = sharedPref.getBoolean(SettingsActivity.KEY_RECORD_LOCAL, true);
         ret.RecordAllowInternal = sharedPref.getBoolean(SettingsActivity.KEY_RECORD_ALLOW_INTERNAL, false);

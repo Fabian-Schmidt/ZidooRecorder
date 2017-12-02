@@ -22,21 +22,21 @@ public class FullscreenActivity extends Activity {
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
-        Settings settings =  SettingsActivity.ReadSettings(this);
+        Settings settings = SettingsActivity.ReadSettings(this);
         Log.d(TAG, settings.toString());
 
         setContentView(R.layout.activity_fullscreen);
 
-        if (settings.Autostart){
+        if (settings.Autostart_HdmiIn){
             startActivity(new Intent(this, RecordActivity.class));
         }
     }
 
-    public void startSettings(View v){
+    public void startSettings(View v) {
         startActivity(new Intent(this, SettingsActivity.class));
     }
 
-    public void startHdmi(View v){
+    public void startHdmi(View v) {
         startActivity(new Intent(this, RecordActivity.class));
     }
 }

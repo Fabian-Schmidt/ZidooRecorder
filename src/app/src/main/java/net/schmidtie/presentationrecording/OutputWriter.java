@@ -9,7 +9,9 @@ import android.widget.Toast;
 
 import com.realtek.hardware.RtkHDMIRxManager;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -30,7 +32,7 @@ public class OutputWriter {
     private Context mContext = null;
     private RecorderClass mRecorderClass = null;
 
-    //private FileOutputStream mFileOutputStream = null;
+
     private Handler mHandler = null;
 
     //188 bytes per TS package. 7 packages max for an MTU of 1500.
@@ -41,7 +43,7 @@ public class OutputWriter {
     private ParcelFileDescriptor mReadPipe = null;
     private ParcelFileDescriptor mUDP_WritePipe = null;
     private DisplayState mDesireState = null;
-    private ParcelFileDescriptor mLocalWritePipe = null;
+    private OutputStream mFileOutputStream = null;
     private long mLocalFileSize = 0;
     private DatagramSocket udpSocket = null;
     private final int TOAST_DURATION = Toast.LENGTH_SHORT;
@@ -88,7 +90,7 @@ public class OutputWriter {
             Log.i(TAG, "mIp = " + desireState.UDP_Target_IP + "  mPort = " + desireState.UDP_Target_Port + "  Multicast = " + mAddress.isMulticastAddress());
             mPort = desireState.UDP_Target_Port;
             try {
-                if (desireState.HdmiVideoStream){
+                if (desireState.HdmiVideoStream) {
                     if (mAddress.isMulticastAddress() == false) {
                         udpSocket = new DatagramSocket(null);
                         udpSocket.setReuseAddress(true);
@@ -101,7 +103,7 @@ public class OutputWriter {
                 }
                 if (desireState.HdmiVideoRecording) {
                     mLocalFileSize = 0;
-                    mLocalWritePipe = GenerateNewLocalWritePipe();
+                    mFileOutputStream = GenerateNewLocalWritePipe();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -112,6 +114,7 @@ public class OutputWriter {
                 mReadPipe = null;
                 return null;
             }
+            StartWritingOutput();
             return this.mUDP_WritePipe;
         } catch (IOException e3) {
             Log.v(TAG, "e3", e3);
@@ -119,15 +122,16 @@ public class OutputWriter {
         }
     }
 
-    private ParcelFileDescriptor GenerateNewLocalWritePipe() {
+    private OutputStream GenerateNewLocalWritePipe() {
         if (mDesireState.HdmiRecordPath != null) {
             try {
                 String str = mDesireState.HdmiRecordPath.getAbsolutePath() + File.separator + GenerateLocalFileName();
                 Log.d(TAG, "record path = " + str);
                 //FileUtil.CreateFileWithFullAcess(recordFolder, recordFileName);
                 File file = new File(str);
-                file.createNewFile();
-                return ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_APPEND | ParcelFileDescriptor.MODE_WRITE_ONLY);
+                if (file.createNewFile()) {
+                    return new BufferedOutputStream(new FileOutputStream(file, true));
+                }
             } catch (IOException e) {
                 Log.e(TAG, "Error during generation of new local write pipe.", e);
             }
@@ -142,66 +146,66 @@ public class OutputWriter {
         return recordFileName;
     }
 
-    public void StartWritingOutput() {
+    private void StartWritingOutput() {
         new Thread(new Runnable() {
             public void run() {
-                Log.i(TAG, "start StartWritingOutput --- ");
+                Log.i(TAG, "start WritingOutput --- ");
                 InputStream autoCloseInputStream = new ParcelFileDescriptor.AutoCloseInputStream(mReadPipe);
-                OutputStream autoCloseLocalOutputStream = null;
-                if (mLocalWritePipe != null) {
-                    autoCloseLocalOutputStream = new ParcelFileDescriptor.AutoCloseOutputStream(mLocalWritePipe);
-                }
                 byte[] bArr = new byte[UDP_Packet_Size];
                 Object obj = 1;
                 int counterTillNextCheckOfFreeDiskSpace = 0;
+                boolean counterIncreased = false;
                 while (mRecorderClass.IsHdmiVideoRecording()) {
                     try {
                         if (autoCloseInputStream.available() > 0) {
-                            counterTillNextCheckOfFreeDiskSpace = counterTillNextCheckOfFreeDiskSpace + 1;
+                            if (!counterIncreased) {
+                                counterTillNextCheckOfFreeDiskSpace = counterTillNextCheckOfFreeDiskSpace + 1;
+                                counterIncreased = true;
+                            }
                             int read = autoCloseInputStream.read(bArr);
+                            //Log.d(TAG, "Read " + read +" bit from encoder.");
                             if (read > 0) {
                                 if (udpSocket != null) {
                                     DatagramPacket datagramPacket = new DatagramPacket(bArr, 0, read, mAddress, mPort);
                                     udpSocket.send(datagramPacket);
                                 }
                                 obj = 1;
-                                if (autoCloseLocalOutputStream != null) {
-                                    autoCloseLocalOutputStream.write(bArr, 0, read);
+                                if (mFileOutputStream != null) {
+                                    mFileOutputStream.write(bArr, 0, read);
                                     mLocalFileSize = mLocalFileSize + read;
                                 }
                             }
                         } else {
                             //All data sent for this frame.
-                            if (counterTillNextCheckOfFreeDiskSpace > 30 * 30) {//every 30 seconds (@30FPS)
+                            counterIncreased = false;
+                            if (counterTillNextCheckOfFreeDiskSpace > 30 * 60) {//every 30 seconds (@60FPS)
                                 counterTillNextCheckOfFreeDiskSpace = 0;
-                                if (autoCloseLocalOutputStream != null
+                                if (mFileOutputStream != null
                                         && mDesireState.HdmiRecordPath != null
                                         && mDesireState.HdmiRecordPath.getFreeSpace() < LOCAL_COPY_MIN_FREE_DISK) {
                                     //Stop recording
                                     Log.i(TAG, "Stop recording local disk is full.");
                                     try {
-                                        autoCloseLocalOutputStream.flush();
+                                        mFileOutputStream.flush();
+                                        mFileOutputStream.close();
                                     } catch (IOException e) {
                                         Log.e(TAG, "LocalOutputStream.flush failed.", e);
                                     }
                                     mLocalFileSize = 0;
-                                    mLocalWritePipe = null;
-                                    autoCloseLocalOutputStream = null;
+                                    mFileOutputStream = null;
                                     mDesireState.HdmiRecordPath = null;
                                 }
-                            } else if (autoCloseLocalOutputStream != null
+                            } else if (mFileOutputStream != null
                                     && mLocalFileSize > LOCAL_COPY_MAX_FILE_SIZE) {
                                 //Max file size reached. Start new file.
                                 try {
-                                    autoCloseLocalOutputStream.flush();
+                                    mFileOutputStream.flush();
+                                    mFileOutputStream.close();
                                 } catch (IOException e) {
                                     Log.e(TAG, "LocalOutputStream.flush failed.", e);
                                 }
                                 mLocalFileSize = 0;
-                                mLocalWritePipe = GenerateNewLocalWritePipe();
-                                if (mLocalWritePipe != null) {
-                                    autoCloseLocalOutputStream = new ParcelFileDescriptor.AutoCloseOutputStream(mLocalWritePipe);
-                                }
+                                mFileOutputStream = GenerateNewLocalWritePipe();
                             } else {
                                 //Wait for 1ms for new data.
                                 Thread.sleep(1);
@@ -215,9 +219,11 @@ public class OutputWriter {
                         obj = null;
                     }
                 }
-                if (autoCloseLocalOutputStream != null) {
+                Log.i(TAG, "end WritingOutput --- ");
+                if (mFileOutputStream != null) {
                     try {
-                        autoCloseLocalOutputStream.flush();
+                        mFileOutputStream.flush();
+                        mFileOutputStream.close();
                     } catch (IOException e) {
                         Log.e(TAG, "LocalOutputStream.flush failed.", e);
                     }
@@ -240,15 +246,6 @@ public class OutputWriter {
                     }
                 } catch (Exception e222) {
                     e222.printStackTrace();
-                }
-                try {
-                    if (autoCloseLocalOutputStream != null) {
-                        autoCloseLocalOutputStream.close();
-                        mLocalWritePipe = null;
-                        Log.i(TAG, "stop LocalWritePipe close --- ");
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
                 }
             }
         }).start();

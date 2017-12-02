@@ -148,7 +148,6 @@ class RecorderClass {
                             if (StateChange != null) {
                                 StateChange.StartRecording();
                             }
-                            mOutputWriter.StartWritingOutput();
                             CurrentState.HdmiRecordTime = 0;
                             MessageHandler.sendEmptyMessageDelayed(MESSAGE_TIMER, MESSAGE_TIMER_TIME);
                         }
@@ -470,6 +469,9 @@ class RecorderClass {
                     }
                 }
 
+                CurrentState.HdmiVideoRecording = DesireState.HdmiVideoRecording;
+                CurrentState.HdmiVideoStream = DesireState.HdmiVideoStream;
+
                 ParcelFileDescriptor prepareIO = mOutputWriter.prepareIO(this.DesireState);
                 if (prepareIO == null) {
                     Log.d(TAG, "mOutputWriter.prepareIO() == null");
@@ -500,8 +502,6 @@ class RecorderClass {
                 CurrentState.HdmiRecordToDeviceAllowed = DesireState.HdmiRecordToDeviceAllowed;
                 CurrentState.HdmiRecordPath = DesireState.HdmiRecordPath;
                 CurrentState.HdmiFileFormat = DesireState.HdmiFileFormat;
-                CurrentState.HdmiVideoRecording = DesireState.HdmiVideoRecording;
-                CurrentState.HdmiVideoStream = DesireState.HdmiVideoStream;
 
                 return true;
             } catch (Exception ex) {

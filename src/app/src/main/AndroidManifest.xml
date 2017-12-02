@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="net.schmidtie.presentationrecording"
-    android:versionCode="1"
-    android:versionName="1.1">
+    package="net.schmidtie.presentationrecording">
 
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -36,18 +34,14 @@
         </activity>
 
         <receiver
-            android:name=".StartMyActivityAtBootReceiver"
+            android:name=".BootReceiver"
             android:label="StartMyServieAtBootReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
 
-        <service android:name=".RecorderService">
-            <intent-filter>
-                <action android:name="com.zidoo.rtk.hdmi.recorder.pip" />
-            </intent-filter>
-        </service>
+        <service android:name=".RecorderService"/>
 
         <activity
             android:name=".RecordActivity"
@@ -61,7 +55,7 @@
             </intent-filter>
         </activity>
         
-        <activity android:name=".SettingsActivity"></activity>
+        <activity android:name=".SettingsActivity"/>
     </application>
 
 </manifest>
