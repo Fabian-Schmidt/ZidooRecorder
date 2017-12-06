@@ -1,0 +1,33 @@
+/system/bin/RtkTranscodeDemo
+usage: ./RtkTranscodeDemo [options]
+    -h help
+    -p playback on start (disabled)
+    -t transcode on start (disabled)
+  source:
+    -s source: [0]file [1]DvdPlayer [2]HDMI Rx/MIPI Camera [3]USB Camera [4]mixer 1 [5]v1 (0)
+    -i input file name: ((null))
+    -F used FileHandle for open input file (disabled)
+    -X camera id (0)
+    -Y audio source [0]Default [1]MIC [5]CAMCORDER [9]HDMI Rx (0)
+    -a Only handle audio track (disabled) for testing
+    -v Only handle Video track (disabled) for testing
+  target:
+    -w width (640)
+    -e height (480)
+    -f framerate (30)
+    -n I frame interval (1)
+    -b video bit rate (500000)
+    -r video ratecontrol [0]Disable [1]Variable [2]Constant [3]VariableSkipFrames [4]ConstantSkipFrames (1)
+    -C audio channel count (2)
+    -S audio sample rate (48000)
+    -B audio bit rate (32000)
+    -M audio channel mode (0)
+  output:
+    -d output type: [0]file [1]stdout [2]ashmem [3]ashmem+RTP [4]udp [5]UDP+RTP [6]UDP+ashmem [7]fd (0)
+    -c output format: [0]MPEG2-TS [1]MP4 (0)
+    -o output file name: ((null))
+    -H record buffer handle: (0)
+    -I udp ip: ((null))
+    -P udp port: (0)
+    -R enable rtp header: (disabled)
+    -D used V1 flip : (disabled)
